@@ -6,6 +6,11 @@ namespace RYSIC::ScreenUtil
 {
 	constexpr size_t TYPEWRITER_MAX_TEXTS = 32U;
 
+	constexpr bool isWithin(int x, int y, int ax, int ay, int aw, int ah)
+		{ return x >= ax && x < ax + aw && y >= ay && y < ay + ah; }
+	constexpr bool isAt(int x, int y, int px, int py)
+		{ return x == px && y == py; }
+
 	enum PrintDirection
 	{
 		LEFT_TO_RIGHT = 0,

@@ -44,6 +44,9 @@ namespace RYSIC
 
 	int Game::run()
 	{
+		window = Interface::Window(0, 0, m_width, m_height, C_GRAY4, C_GRAY3, C_GRAY0, C_GRAY3);
+		window.children.push_back(std::unique_ptr<Interface::Component>(new Interface::Label(0, 0, "hello world!")));
+
 		while(!m_quit)
 		{
 			m_context.present(m_console); // update console to screen
@@ -51,9 +54,10 @@ namespace RYSIC
 			tcod::draw_rect(m_console, {1, 1, (int) m_width - 2, (int) m_height - 2}, 0, C_GRAY4, C_GRAY0);
 			handleEvents();
 
-			doState();
+			//doState();
 
-			drawWindow(); // draw border & buttons over everything else
+			window.render(m_console);
+			// drawWindow(); // draw border & buttons over everything else
 		}
 		return m_exitCode;
 	}
@@ -81,15 +85,25 @@ namespace RYSIC
 		return std::find(m_keys_down.begin(), m_keys_down.end(), key) != m_keys_down.end();
 	}
 
+	bool Game::isKeyPressed(SDL_Keycode key)
+	{
+		return std::find(m_keys_pressed.begin(), m_keys_pressed.end(), key) != m_keys_pressed.end();
+	}
+
 	void Game::handleEvents()
 	{
+		m_keys_pressed.clear();
 		SDL_Event event;
 		while(SDL_PollEvent(&event))
 		{
 			m_context.convert_event_coordinates(event); // convert pixel (screen space) to tile space
+			std::array<int, 2> eventWindowCoords = {0, 0};
+			if(window.handleEvent(event, eventWindowCoords))
+				continue;
 			switch(event.type) {
 				case SDL_KEYDOWN:
 					m_keys_down.push_back(event.key.keysym.sym);
+					m_keys_pressed.push_back(event.key.keysym.sym);
 					break;
 				case SDL_KEYUP:
 					{
@@ -106,10 +120,10 @@ namespace RYSIC
 					{
 						m_mouse.x = event.button.x;
 						m_mouse.y = event.button.y;
-						if(IS_WITHIN(m_mouse.x, m_mouse.y, (int) m_width - 4, 0, 3, 1))
+						/*if(ScreenUtil::isWithin(m_mouse.x, m_mouse.y, (int) m_width - 4, 0, 3, 1))
 							quit();
-						if(IS_WITHIN(m_mouse.x, m_mouse.y, (int) m_width - 8, 0, 3, 1))
-							setFullscreen(!m_fullscreen);
+						if(ScreenUtil::isWithin(m_mouse.x, m_mouse.y, (int) m_width - 8, 0, 3, 1))
+							setFullscreen(!m_fullscreen);*/
 					}
 					break;
 				case SDL_QUIT:
@@ -147,7 +161,7 @@ namespace RYSIC
 		// RESIZE HANDLE
 		if(!m_fullscreen)
 		{
-			if(IS_AT(m_mouse.x, m_mouse.y, (int) m_width - 1, (int) m_height - 1))
+			if(ScreenUtil::isAt(m_mouse.x, m_mouse.y, (int) m_width - 1, (int) m_height - 1))
 				tcod::print(m_console, {(int) m_width - 1, (int) m_height - 1}, "\u255D", C_GRAY4, std::nullopt);
 			else
 				tcod::print(m_console, {(int) m_width - 1, (int) m_height - 1}, "\u255D", std::nullopt, std::nullopt);
@@ -155,31 +169,30 @@ namespace RYSIC
 
 		// SIZE BUTTON
 		std::string sizeBtnText = m_fullscreen ? " \u25BC " : " \u25B2 ";
-		if(IS_WITHIN(m_mouse.x, m_mouse.y, (int) m_width - 8, 0, 3, 1))
+		if(ScreenUtil::isWithin(m_mouse.x, m_mouse.y, (int) m_width - 8, 0, 3, 1))
 			tcod::print(m_console, {(int) m_width - 8, 0}, sizeBtnText, C_GRAY0, C_GRAY1);
 		else
 			tcod::print(m_console, {(int) m_width - 8, 0}, sizeBtnText, C_GRAY0, C_GRAY2);
 
 		// CLOSE BUTTON
-		if(IS_WITHIN(m_mouse.x, m_mouse.y, (int) m_width - 4, 0, 3, 1))
+		if(ScreenUtil::isWithin(m_mouse.x, m_mouse.y, (int) m_width - 4, 0, 3, 1))
 			tcod::print(m_console, {(int) m_width - 4, 0}, " X ", C_GRAY4, C_RED_LIGHT);
 		else
 			tcod::print(m_console, {(int) m_width - 4, 0}, " X ", C_GRAY4, C_RED);
 	}
 
-	SDL_HitTestResult Game::hitTestCallback(SDL_Window *win, const SDL_Point *area, void *data)
+	SDL_HitTestResult Game::hitTestCallback(SDL_Window*, const SDL_Point *area, void *data)
 	{
-		win; // unused param
 		Game *game = (Game*) data;
 		auto mouse = game->m_context.pixel_to_tile_coordinates(std::array<int, 2>{area->x, area->y});
 		if(game->m_fullscreen)
 			return SDL_HITTEST_NORMAL;
 		if(mouse[1] == 0 &&														// if inside top bar
-			!IS_WITHIN(mouse[0], mouse[1], (int) game->m_width - 4, 0, 3, 1) &&	// and NOT over close button
-			!IS_WITHIN(mouse[0], mouse[1], (int) game->m_width - 8, 0, 3, 1)	// and NOT over size button
+			!ScreenUtil::isWithin(mouse[0], mouse[1], (int) game->m_width - 4, 0, 3, 1) &&	// and NOT over close button
+			!ScreenUtil::isWithin(mouse[0], mouse[1], (int) game->m_width - 8, 0, 3, 1)	// and NOT over size button
 			)
 			return SDL_HITTEST_DRAGGABLE;
-		if(IS_AT(mouse[0], mouse[1], (int) game->m_width - 1, (int) game->m_height - 1))
+		if(ScreenUtil::isAt(mouse[0], mouse[1], (int) game->m_width - 1, (int) game->m_height - 1))
 			return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
 		return SDL_HITTEST_NORMAL;
 	}
@@ -242,7 +255,9 @@ namespace RYSIC
 			ScreenUtil::directionalPrint(m_console, "RYSIC", (m_width - 5) / 2, m_height / 2, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_WHITE}, std::nullopt);
 			ScreenUtil::directionalPrint(m_console, "PRESS ENTER", (m_width - 11) / 2, (m_height / 2) + 2, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_GRAY2}, std::nullopt);
 			if(isKeyDown(SDL_KeyCode::SDLK_RETURN))
-				m_gs_ctr++;
+			{
+				m_gs_timer = SDL_GetTicks64(); m_gs_ctr++;
+			}
 			break;
 		case 12:
 		case 13:
@@ -250,10 +265,11 @@ namespace RYSIC
 		case 15:
 			ScreenUtil::directionalPrint(m_console, "RYSIC", (m_width - 5) / 2, m_height / 2, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {CF_TONE(C_WHITE, 4 - (m_gs_ctr - 12), 4)}, std::nullopt);
 			ScreenUtil::directionalPrint(m_console, "PRESS ENTER", (m_width - 11) / 2, (m_height / 2) + 2, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {CF_TONE(C_GRAY2, 4 - (m_gs_ctr - 12), 4)}, std::nullopt);
-			if(SDL_GetTicks64() - m_gs_timer > 100)
+			if(SDL_GetTicks64() - m_gs_timer > 100) 
 			{
 				m_gs_timer = SDL_GetTicks64(); m_gs_ctr++;
 			}
+			break;
 		case 16:
 			m_gs_ctr = 0;
 			m_gameState = GS_TITL;
@@ -265,6 +281,64 @@ namespace RYSIC
 	
 	void Game::doStateTITL()
 	{
-		tcod::print(m_console, {3, 3}, "TODO", {C_RED_LIGHT}, std::nullopt);
+		static int selected = 0;
+		auto completed = ScreenUtil::typewriterShow(m_console);
+		switch (m_gs_ctr)
+		{
+		case 0: // init
+			ScreenUtil::typewriterPrint("RYSIC", 3, 3, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_WHITE}, std::nullopt, 20);
+			m_gs_ctr++;
+			break;
+		case 1:
+			if(completed.size() > 0)
+			{
+				m_gs_timer = SDL_GetTicks64(); m_gs_ctr++;
+			}
+			break;
+		case 2:
+			ScreenUtil::directionalPrint(m_console, "RYSIC", 3, 3, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_WHITE}, std::nullopt);
+			if(SDL_GetTicks64() - m_gs_timer > 1000)
+			{
+				m_gs_timer = SDL_GetTicks64(); m_gs_ctr++;
+			}
+			break;
+		case 3:
+			if(isKeyPressed(SDL_KeyCode::SDLK_UP) || isKeyPressed(SDL_KeyCode::SDLK_KP_8))
+			{
+				selected--;
+				if(selected < 0)
+					selected = 2;
+			}
+			if(isKeyPressed(SDL_KeyCode::SDLK_DOWN) || isKeyPressed(SDL_KeyCode::SDLK_KP_2))
+			{
+				selected++;
+				if(selected > 2)
+					selected = 0;
+			}
+			if(isKeyPressed(SDL_KeyCode::SDLK_RETURN))
+				switch (selected)
+				{
+				case 0:
+					/* code */
+					break;
+				
+				default:
+					break;
+				}
+
+			if(selected == 0)
+				ScreenUtil::directionalPrint(m_console, "NEW GAME <", 3, 5, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_WHITE}, std::nullopt);
+			else
+				ScreenUtil::directionalPrint(m_console, "NEW GAME", 3, 5, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_GRAY2}, std::nullopt);
+			if(selected == 1)
+				ScreenUtil::directionalPrint(m_console, "OPTION <", 3, 7, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_WHITE}, std::nullopt);
+			else
+				ScreenUtil::directionalPrint(m_console, "OPTION", 3, 7, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_GRAY2}, std::nullopt);
+			if(selected == 2)
+				ScreenUtil::directionalPrint(m_console, "QUIT <", 3, 9, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_WHITE}, std::nullopt);
+			else
+				ScreenUtil::directionalPrint(m_console, "QUIT", 3, 9, ScreenUtil::PrintDirection::LEFT_TO_RIGHT, {C_GRAY2}, std::nullopt);
+			break;
+		}
 	}
 }

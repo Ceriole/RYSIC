@@ -4,9 +4,7 @@
 #include <libtcod.hpp>
 
 #include "Colors.hpp"
-
-#define IS_WITHIN(X, Y, A_X, A_Y, A_W, A_H) ((X) >= (A_X) && (X) < ((A_X) + (A_W)) && (Y) >= (A_Y) && (Y) < ((A_Y) + (A_H)))
-#define IS_AT(X, Y, P_X, P_Y) ((X) == (P_X) && (Y) == (P_Y))
+#include "Interface.hpp"
 
 namespace RYSIC
 {
@@ -32,7 +30,8 @@ namespace RYSIC
 	long long m_gs_timer = 0;
 	bool m_quit, m_fullscreen;
 	int m_exitCode = 0;
-	std::vector<SDL_Keycode> m_keys_down;
+	std::vector<SDL_Keycode> m_keys_down, m_keys_pressed;
+	Interface::Window window;
 
 	public:
 		Game(TCOD_ContextParams params, int width, int height);
@@ -41,6 +40,7 @@ namespace RYSIC
 		void quit(int code = 0);
 		void setFullscreen(bool fullscreen);
 		bool isKeyDown(SDL_Keycode key);
+		bool isKeyPressed(SDL_Keycode key);
 	private:
 		void drawWindow();
 		void handleEvents();

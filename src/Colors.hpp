@@ -25,4 +25,24 @@ namespace RYSIC
 			(uint8_t) (((double) col.b / tone_cnt) * tone_idx)
 		};
 	}
+
+	constexpr TCOD_ColorRGB CF_DARKEN(const TCOD_ColorRGB col)
+	{
+		return
+		{
+			(uint8_t) (col.r / 2),
+			(uint8_t) (col.g / 2),
+			(uint8_t) (col.b / 2)
+		};
+	}
+
+	constexpr TCOD_ColorRGB CF_LIGHTEN(const TCOD_ColorRGB col)
+	{
+		return
+		{
+			(uint8_t) (MAX(((int) col.r * 2), UINT8_MAX)),
+			(uint8_t) (MAX(((int) col.g * 2), UINT8_MAX)),
+			(uint8_t) (MAX(((int) col.b * 2), UINT8_MAX))
+		};
+	}
 }
