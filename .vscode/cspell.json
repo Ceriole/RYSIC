@@ -19,6 +19,7 @@
     "emcmake",
     "EMSCRIPTEN",
     "EMSDK",
+    "Fullscreen",
     "ilammy",
     "libtcod",
     "lodepng",
@@ -37,7 +38,23 @@
     "vsync",
     "Wextra"
   ],
-  "ignoreWords": [],
+  "ignoreWords": [
+    "Andux",
+    "CSFT",
+    "HITTEST",
+    "MOUSEBUTTONDOWN",
+    "MOUSEBUTTONUP",
+    "MOUSEMOTION",
+    "OPTN",
+    "RYSIC",
+    "SDLK",
+    "TITL",
+    "Topbar",
+    "blit",
+    "cerisoft",
+    "keysym",
+    "subconsole"
+  ],
   "import": [],
   "enableFiletypes": [
     "cmake"

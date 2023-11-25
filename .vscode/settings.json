@@ -3,16 +3,14 @@
   "cmake.sourceDirectory": "${workspaceFolder}",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "xaver.clang-format",
-  "editor.rulers": [
-    120
-  ],
+  "editor.rulers": [120],
   "cmake.configureArgs": [
     "-Wdev",
-    "-Wdeprecated",
+    "-Wdeprecated"
     //"--warn-uninitialized",
   ],
   "cmake.configureSettings": {
-    "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+    "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake"
     //"VCPKG_TARGET_TRIPLET": "x64-windows-static",
   },
   "cmake.buildEnvironment": {
@@ -25,6 +23,11 @@
     "editor.defaultFormatter": "redhat.vscode-yaml"
   },
   "files.associations": {
+    "*.asm": "wla-dx-asm",
+    "*.inc": "gbz80",
+    "*.s": "ca65-65816",
+    "*.c": "c",
+    "*.h": "cpp",
     "algorithm": "cpp",
     "array": "cpp",
     "atomic": "cpp",
@@ -100,6 +103,8 @@
     "xtr1common": "cpp",
     "xtree": "cpp",
     "xutility": "cpp",
-    "fstream": "cpp"
-  }
+    "fstream": "cpp",
+    "set": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }

@@ -4,6 +4,9 @@
 
 namespace RYSIC
 {
+	using Color = std::optional<TCOD_ColorRGB>;
+	using ColorRGBA = std::optional<TCOD_ColorRGBA>;
+
 	constexpr TCOD_ColorRGB
 			C_BLACK = {0, 0, 0},
 			C_GRAY0 = {20, 20, 20},
@@ -16,33 +19,7 @@ namespace RYSIC
 			C_RED_LIGHT = {255, 80, 80},
 			C_CERISOFT = {255, 100, 0};
 	
-	constexpr TCOD_ColorRGB CF_TONE(const TCOD_ColorRGB col, int tone_idx, int tone_cnt)
-	{
-		return
-		{
-			(uint8_t) (((double) col.r / tone_cnt) * tone_idx),
-			(uint8_t) (((double) col.g / tone_cnt) * tone_idx),
-			(uint8_t) (((double) col.b / tone_cnt) * tone_idx)
-		};
-	}
-
-	constexpr TCOD_ColorRGB CF_DARKEN(const TCOD_ColorRGB col)
-	{
-		return
-		{
-			(uint8_t) (col.r / 2),
-			(uint8_t) (col.g / 2),
-			(uint8_t) (col.b / 2)
-		};
-	}
-
-	constexpr TCOD_ColorRGB CF_LIGHTEN(const TCOD_ColorRGB col)
-	{
-		return
-		{
-			(uint8_t) (MAX(((int) col.r * 2), UINT8_MAX)),
-			(uint8_t) (MAX(((int) col.g * 2), UINT8_MAX)),
-			(uint8_t) (MAX(((int) col.b * 2), UINT8_MAX))
-		};
-	}
+	TCOD_ColorRGB GetColorFraction(const TCOD_ColorRGB col, int tone_idx, int tone_cnt);
+	TCOD_ColorRGB DarkenColor(const TCOD_ColorRGB col);
+	TCOD_ColorRGB LightenColor(const TCOD_ColorRGB col);
 }

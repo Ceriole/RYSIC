@@ -31,7 +31,8 @@ namespace RYSIC
 	bool m_quit, m_fullscreen;
 	int m_exitCode = 0;
 	std::vector<SDL_Keycode> m_keys_down, m_keys_pressed;
-	Interface::Window window;
+	Ref<Interface::Window> m_window;
+	Ref<Interface::Canvas> m_canvas;
 
 	public:
 		Game(TCOD_ContextParams params, int width, int height);
@@ -42,10 +43,10 @@ namespace RYSIC
 		bool isKeyDown(SDL_Keycode key);
 		bool isKeyPressed(SDL_Keycode key);
 	private:
-		void drawWindow();
 		void handleEvents();
 		void doState();
-		static SDL_HitTestResult hitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
+		
+		static SDL_HitTestResult HitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
 
 		void doStateCSFT();
 		void doStateTITL();
