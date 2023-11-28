@@ -2,14 +2,15 @@
 
 #include "ScreenUtil.hpp"
 #include "Game.hpp"
+#include "Util.hpp"
 
 namespace RYSIC::Interface
 {
 
-	const Pos Component::getAbsolutePosition() const
+	const Pos Component::get_abs_pos() const
 	{
 		if(parent != nullptr)
-			return parent->getAbsolutePositionOfChild(this);
+			return parent->get_abs_pos_of_child(this);
 		return {rect.x, rect.y};
 	}
 
@@ -18,7 +19,7 @@ namespace RYSIC::Interface
 		const std::optional<TCOD_ColorRGB> bg)
 	{
 		tcod::Console subconsole = tcod::Console{(int) w, (int) h};
-		ScreenUtil::fill(subconsole, 0, fg, bg);
+		Util::Screen::fill(subconsole, 0, fg, bg);
 		return subconsole;
 	}
 
@@ -26,9 +27,9 @@ namespace RYSIC::Interface
 	{
 		if(!enabled)
 			return;
-		if(rect.x == 0 || rect.y == 0)
+		if(rect.w == 0 || rect.h == 0)
 			return;
-		
+
 		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
 		for(auto comp = children.begin(); comp != children.end(); comp++)
 			if((*comp)->enabled)
@@ -36,7 +37,7 @@ namespace RYSIC::Interface
 		tcod::blit(console, subconsole, {rect.x, rect.y});
 	}
 
-	bool Container::handleEvent(SDL_Event &event, Pos &screen_pos)
+	bool Container::handle_event(SDL_Event &event, Pos &screen_pos)
 	{
 		if(!enabled)
 			return false;
@@ -47,7 +48,7 @@ namespace RYSIC::Interface
 		for(auto comp = children.begin(); comp != children.end(); comp++)
 			if((*comp)->enabled)
 			{
-				handled = (*comp)->handleEvent(event, screen_pos);
+				handled = (*comp)->handle_event(event, screen_pos);
 				if(handled)
 					break;
 			}
@@ -55,7 +56,7 @@ namespace RYSIC::Interface
 		return handled;
 	}
 
-	const Pos Container::getAbsolutePositionOfChild(const Component* child) const
+	const Pos Container::get_abs_pos_of_child(const Component* child) const
 	{
 		for(auto &comp : children)
 			if(comp.get() == child)
@@ -63,16 +64,17 @@ namespace RYSIC::Interface
 		return {child->rect.x, child->rect.y};
 	}
 
-	bool Container::Add(const Ref<Component> comp)
+	bool Container::add(const Ref<Component> comp)
 	{
 		if(children.find(comp) != children.end())
 			return false;
 		comp->parent = this;
+		comp->parentType = CONTAINER;
 		children.insert(comp);
 		return true;
 	}
 
-	bool Container::Remove(const Ref<Component> comp)
+	bool Container::remove(const Ref<Component> comp)
 	{
 		if(children.find(comp) == children.end())
 			return nullptr;
@@ -82,51 +84,70 @@ namespace RYSIC::Interface
 		return true;
 	}
 
-	void Container::RemoveAll()
+	void Container::remove_all()
 	{
-		for(auto &comp : children)
-			Remove(comp);
+		std::set<Ref<Component>> tempChildren(children);
+		for(auto &comp : tempChildren)
+			remove(comp);
 	}
 
 	void Frame::render(TCOD_Console &console)
 	{
-		if(!enabled)
+		if(!enabled)													// it not enabled skip drawing
 			return;
-		if(rect.w == 0 || rect.h == 0)
+		if(rect.w == 0 || rect.h == 0)									// if width or height is 0 then skip drawing
 			return;
 		
 		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
 
-		Rect temp_rect = rect;										// save position, width and height
+		Rect temp_rect = rect;											// save position, width and height
 
-		switch (decoration)										// adjust position, width and height
-		{														// to fit window frame/decor
+		switch (decoration)												// adjust position, width and height
+		{																// to fit window frame/decor
 		case BORDERED:		rect.w -= 2, rect.h -= 2,
 							rect.x += 1, rect.y += 1;	break;
 		case HEADER:		rect.y += 1;
 		case FOOTER:		rect.h -= 1;				break;
 		case SIDEBAR_L:		rect.x += 1;
 		case SIDEBAR_R:		rect.w -= 1;				break;
+		default:
 		case NONE:										break;
-		}							
+		}
+
 		if(((rect.w >= 1 || rect.h >= 1) && decoration != NONE) 		// only render components if they will
 			|| ((rect.w > 1 && rect.h > 1) && decoration != BORDERED)	// be visible with decoration (if set)
 			|| (rect.w > 2 && rect.h > 2))
-			Container::render(subconsole);						// render child components
+			Container::render(subconsole);								// render child components
 		
-		rect = temp_rect;										// restore position, width and height
+		rect = temp_rect;												// restore position, width and height
 		
-																// draw frame rectangle
-		ScreenUtil::draw_rect(subconsole, {0, 0, rect.w, rect.h}, 0, frame_fg, frame_bg);
-		if(!title.empty())										// draw frame title
-			tcod::print_rect(subconsole, {MIN(rect.w, 2), 0, MAX(rect.w - 4, 0), 1}, title, std::nullopt, std::nullopt, alignmentToTCOD(title_align));
+		switch (decoration)												// draw frame rectangle
+		{
+		case BORDERED:
+			Util::Screen::draw_rect(subconsole, {0, 0, rect.w, rect.h}, 0, frame_fg, frame_bg); break;
+		case HEADER:
+			Util::Screen::draw_hline(subconsole, 0, 0, 0, 0, frame_fg, frame_bg); break;
+		case FOOTER:
+			Util::Screen::draw_hline(subconsole, 0, rect.h - 1, 0, 0, frame_fg, frame_bg); break;
+		case SIDEBAR_L:
+			Util::Screen::draw_vline(subconsole, 0, 0, 0, 0, frame_fg, frame_bg); break;
+		case SIDEBAR_R:
+			Util::Screen::draw_vline(subconsole, rect.w - 1, 0, 0, 0, frame_fg, frame_bg); break;
+		default:
+		case NONE:
+			break;
+		}
+		
+		if(!title.empty())												// draw frame title
+			tcod::print_rect(subconsole, {MIN(rect.w, 2), 0, MAX(rect.w - 4, 0), 1}, title, std::nullopt, std::nullopt,
+			alignmentToTCOD(title_align));
 
 		tcod::blit(console, subconsole, {rect.x, rect.y});				// blit canvas to console
 	}
 
-	const Pos Frame::getAbsolutePositionOfChild(const Component *child) const
+	const Pos Frame::get_abs_pos_of_child(const Component *child) const
 	{
-		Pos pos = Container::getAbsolutePositionOfChild(child);
+		Pos pos = Container::get_abs_pos_of_child(child);
 		switch (decoration)
 		{
 		case BORDERED:		pos.x += 1, pos.y += 1;	break;
@@ -149,7 +170,7 @@ namespace RYSIC::Interface
 
 		Frame::render(subconsole);								// render frame
 		if(drawTopbar)
-			ScreenUtil::draw_hline(subconsole, 0, 0, 0, 0, topbar_fg, topbar_bg);
+			Util::Screen::draw_hline(subconsole, 0, 0, 0, 0, topbar_fg, topbar_bg);
 		for(auto comp = widgets.begin(); comp != widgets.end(); comp++)
 			if((*comp)->enabled)
 				(*comp)->render(subconsole);
@@ -157,7 +178,7 @@ namespace RYSIC::Interface
 		tcod::blit(console, subconsole, {rect.x, rect.y});				// blit canvas to console
 	}
 
-	bool Window::handleEvent(SDL_Event &event, Pos &screen_pos)
+	bool Window::handle_event(SDL_Event &event, Pos &screen_pos)
 	{
 		if(!enabled)
 			return false;
@@ -167,7 +188,7 @@ namespace RYSIC::Interface
 		for(auto comp = widgets.begin(); comp != widgets.end(); comp++)
 			if((*comp)->enabled)
 			{
-				handled = (*comp)->handleEvent(event, screen_pos);
+				handled = (*comp)->handle_event(event, screen_pos);
 				if(handled)
 					break;
 			}
@@ -175,22 +196,22 @@ namespace RYSIC::Interface
 			for(auto comp = children.begin(); comp != children.end(); comp++)
 				if((*comp)->enabled)
 				{
-					handled = (*comp)->handleEvent(event, screen_pos);
+					handled = (*comp)->handle_event(event, screen_pos);
 					if(handled)
 						break;
 				}
 		return handled;
 	}
 
-	const Pos Window::getAbsolutePositionOfChild(const Component *child) const
+	const Pos Window::get_abs_pos_of_child(const Component *child) const
 	{
 		for(auto &comp : widgets)
 			if(comp.get() == child)
-				return Container::getAbsolutePositionOfChild(child);
-		return Frame::getAbsolutePositionOfChild(child);
+				return Container::get_abs_pos_of_child(child);
+		return Frame::get_abs_pos_of_child(child);
 	}
 
-	bool Window::AddWidget(Ref<Component> comp)
+	bool Window::add_widget(Ref<Component> comp)
 	{
 		if(widgets.find(comp) != widgets.end())
 			return false;
@@ -200,7 +221,7 @@ namespace RYSIC::Interface
 		return true;
 	}
 
-	bool Window::RemoveWidget(Ref<Component> comp)
+	bool Window::remove_widget(Ref<Component> comp)
 	{
 		if(widgets.find(comp) == widgets.end())
 			return false;
@@ -210,25 +231,25 @@ namespace RYSIC::Interface
 		return true;
 	}
 
-	void Window::RemoveAllWidgets()
+	void Window::remove_all_widgets()
 	{
 		for(auto &comp : widgets)
-			Remove(comp);
+			remove(comp);
 	}
 
-	SDL_HitTestResult Window::getHitTestResult(const Pos &mouse)
+	SDL_HitTestResult Window::get_hittest_result(const Pos &mouse)
 	{
-		const Pos local = mouse - getAbsolutePosition();
+		const Pos local = mouse - get_abs_pos();
 		for(auto &comp : widgets)
 		{
 			Button* btn = dynamic_cast<Button*>(comp.get());
 			if(btn != nullptr)
 			{
-				if(ScreenUtil::isWithin(local.x, local.y, btn->rect.x, btn->rect.y, btn->rect.w, btn->rect.h))
+				if(Util::isWithin(local.x, local.y, btn->rect.x, btn->rect.y, btn->rect.w, btn->rect.h))
 					return btn->hitTestResult;
 			}
 		}
-		if(drawTopbar && ScreenUtil::isWithin(local.x, local.y, 0, 0, rect.w, 1))
+		if(drawTopbar && Util::isWithin(local.x, local.y, 0, 0, rect.w, 1))
 			return SDL_HITTEST_DRAGGABLE;
 		return hitTestResult;
 	}
@@ -271,7 +292,7 @@ namespace RYSIC::Interface
 		tcod::blit(console, subconsole, {rect.x, rect.y});				// blit canvas to console
 	}
 
-	bool Button::handleEvent(SDL_Event &event, Pos &screen_pos)
+	bool Button::handle_event(SDL_Event &event, Pos &screen_pos)
 	{
 		if(!enabled)
 			return false;
@@ -280,14 +301,14 @@ namespace RYSIC::Interface
 		if(event.type == SDL_MOUSEMOTION)
 		{
 			Pos local = Pos{event.motion.x, event.motion.y} - screen_pos;
-			state = ScreenUtil::isWithin(local.x, local.y, rect.x, rect.y, rect.w, rect.h) ? HOVERED : IDLE;
+			state = Util::isWithin(local.x, local.y, rect.x, rect.y, rect.w, rect.h) ? HOVERED : IDLE;
 		}
 		if(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
 		{
 			Pos local = Pos{event.motion.x, event.motion.y} - screen_pos;
 
-			state = ScreenUtil::isWithin(local.x, local.y, rect.x, rect.y, rect.w, rect.h) ? HOVERED : IDLE;
-			if(ScreenUtil::isWithin(local.x, local.y, rect.x, rect.y, rect.w, rect.h))
+			state = Util::isWithin(local.x, local.y, rect.x, rect.y, rect.w, rect.h) ? HOVERED : IDLE;
+			if(Util::isWithin(local.x, local.y, rect.x, rect.y, rect.w, rect.h))
 			{
 				if(on_pressed)
 					on_pressed(event.button.x, event.button.y, this);
@@ -301,7 +322,7 @@ namespace RYSIC::Interface
 	}
 
 	Canvas::Canvas(const Rect &_rect, Color _fg, Color _bg)
-			: Container(_rect), console{_rect.w, _rect.h}
+			: Container(_rect), canvas{_rect.w, _rect.h}
 	{ 
 		fg = _fg, bg = _bg;
 		clear();
@@ -311,11 +332,10 @@ namespace RYSIC::Interface
 	{
 		if(!enabled)
 			return;
-		if(rect.x == 0 || rect.y == 0)
+		if(rect.w == 0 || rect.h == 0)
 			return;
-		
 		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
-		tcod::blit(subconsole, this->console);
+		tcod::blit(subconsole, canvas);
 		for(auto comp = children.begin(); comp != children.end(); comp++)
 			if((*comp)->enabled)
 				(*comp)->render(subconsole);
@@ -324,6 +344,75 @@ namespace RYSIC::Interface
 
 	void Canvas::clear()
 	{
-		ScreenUtil::fill(console, ' ', fg, bg);
+		Util::Screen::fill(canvas, ' ', fg, bg);
+	}
+	
+	bool TypingLabel::start()
+	{
+		if(!enabled)
+			return false;
+		if(started || completed)
+			return false;
+		started = true;
+		start_time = SDL_GetTicks64();
+		return true;
+	}
+
+	bool TypingLabel::reset()
+	{
+		if(!started && !completed)
+			return false;
+		started = completed = false;
+		current_text.clear();
+		start_time = 0;
+		return true;
+	}
+
+	bool TypingLabel::show()
+	{
+		if(completed)
+			return false;
+		completed = true;
+		current_text = text;
+		return true;
+	}
+
+	void TypingLabel::render(TCOD_Console &console)
+	{
+		if(!started || !enabled)
+			return;
+		if(text.empty())
+			return;
+		if(!completed)
+		{
+			unsigned int curr_len = (unsigned int) ((SDL_GetTicks64() - start_time) / delay);
+			if(curr_len >= text.size())
+				show();
+			else
+				current_text = text.substr(0, curr_len);
+		}
+		if(!current_text.empty())
+			tcod::print_rect(console, {rect.x, rect.y, rect.w, rect.h}, current_text, fg, bg);
+	}
+
+	void ProgressBar::render(TCOD_Console &console)
+	{
+		if(!enabled)
+			return;
+		
+		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, std::nullopt, bg);
+
+		switch (direction)
+		{
+		default:
+		case HORIZONTAL:
+			Util::Screen::fill_rect(subconsole, {0, 0, (int) round(rect.w * value), rect.h}, 0, bg, fg); break;
+		case VERTICAL:
+			Util::Screen::fill_rect(subconsole, {0, 0, rect.w, (int) round(rect.h * value)}, 0, bg, fg); break;
+		}
+		
+		tcod::print_rect(subconsole, {0, 0, 0, 0}, text, label_color, std::nullopt, alignmentToTCOD(align));
+
+		tcod::blit(console, subconsole, {rect.x, rect.y});				// blit canvas to console
 	}
 }

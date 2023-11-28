@@ -19,9 +19,14 @@ file(
     CONFIGURE_DEPENDS  # Automatically reconfigure if source files are added/removed.
     ${PROJECT_SOURCE_DIR}/src/*.cpp
     ${PROJECT_SOURCE_DIR}/src/*.hpp
-	${PROJECT_SOURCE_DIR}/src/*.h
+    ${PROJECT_SOURCE_DIR}/src/*.h
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+target_include_directories(
+    ${PROJECT_NAME} PRIVATE
+    ${PROJECT_SOURCE_DIR}/src
+)
 
 # Ensure the C++17 standard is available.
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

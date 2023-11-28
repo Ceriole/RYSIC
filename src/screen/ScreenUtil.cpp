@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 
-namespace RYSIC::ScreenUtil
+namespace RYSIC::Util::Screen
 {
 
 	void set_char(TCOD_Console &console, int x, int y, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg)
@@ -15,6 +15,11 @@ namespace RYSIC::ScreenUtil
 		if(ch != 0) tile.ch = ch;
 		if(fg.has_value()) tile.fg = fg.value();
 		if(bg.has_value()) tile.bg = bg.value();
+	}
+
+	void set_char(TCOD_Console &console, int x, int y, const Character &gfx)
+	{
+		set_char(console, x, y, gfx.ch, gfx.fg, gfx.bg);
 	}
 
 	void draw_hline(TCOD_Console &console, int x, int y, int w, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg)
@@ -63,7 +68,7 @@ namespace RYSIC::ScreenUtil
 				set_char(console, x, y, ch, fg, bg);
 	}
 
-	void directionalPrint(TCOD_Console &console, std::string text, int x, int y, PrintDirection dir, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg)
+	void dir_print(TCOD_Console &console, std::string text, int x, int y, PrintDirection dir, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg)
 	{
 		for(int i = 0; i < text.size(); i++)
 		{
@@ -77,42 +82,6 @@ namespace RYSIC::ScreenUtil
 			case PrintDirection::BOTTOM_TO_TOP: y--; break;
 			}
 		}
-	}
-
-	static std::vector<TypewriterText> s_typewriterTexts;
-	void typewriterPrint(std::string text, int x, int y, PrintDirection dir, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg, unsigned int delay)
-	{
-		s_typewriterTexts.push_back({text, x, y, dir, fg, bg, SDL_GetTicks64(), delay, true});
-	}
-
-	std::vector<TypewriterText> typewriterShow(TCOD_Console &console)
-	{
-		unsigned long long curr_time = SDL_GetTicks64();
-		std::vector<TypewriterText> completed;
-		for(auto ttext = s_typewriterTexts.begin(); ttext != s_typewriterTexts.end(); ttext++)
-		{
-			if(ttext->active)
-			{
-				size_t curr_length = (curr_time - ttext->startTime) / ttext->delay;
-				if(curr_length > ttext->text.size())
-				{
-					curr_length = ttext->text.size();
-					completed.push_back(*ttext);
-					ttext->active = false;
-				}
-				std::string to_print = ttext->text.substr(0, curr_length);
-				directionalPrint(console, to_print, ttext->x, ttext->y, ttext->dir, ttext->fg, ttext->bg);
-			}
-		}
-		auto ttext_completed_predicate = [](auto ttext) -> bool { return !ttext.active; };
-		s_typewriterTexts.erase(std::remove_if(s_typewriterTexts.begin(), s_typewriterTexts.end(), ttext_completed_predicate), s_typewriterTexts.end());
-
-		return completed;
-	}
-
-	void typewriterClear()
-	{
-		s_typewriterTexts.clear();
 	}
 
 }

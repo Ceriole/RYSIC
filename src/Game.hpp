@@ -3,52 +3,37 @@
 #include <SDL2/SDL.h>
 #include <libtcod.hpp>
 
-#include "Colors.hpp"
-#include "Interface.hpp"
+#include "screen/Interface.hpp"
+#include "world/World.hpp"
 
 namespace RYSIC
 {
-	enum GameState : uint8_t
-	{
-		GS_CSFT = 0x00,
-		GS_TITL,
-		GS_OPTN,
-		GS_CHAR,
-		GS_PLAY,
-		GS_OVER
-	};
 
 	class Game
 	{
 	private:
-	tcod::Context m_context;
-	tcod::Console m_console;
-	int m_width, m_height;
-	struct s_mouse { int x, y; } m_mouse;
-	GameState m_gameState = GS_CSFT;
-	int m_gs_ctr = 0;
-	long long m_gs_timer = 0;
-	bool m_quit, m_fullscreen;
-	int m_exitCode = 0;
-	std::vector<SDL_Keycode> m_keys_down, m_keys_pressed;
-	Ref<Interface::Window> m_window;
-	Ref<Interface::Canvas> m_canvas;
+		tcod::Context m_context;
+		tcod::Console m_console;
+		int m_width, m_height;
+		Pos m_mouse;
+		bool m_quit, m_fullscreen;
+		int m_exitCode = 0;
+		Ref<Interface::Window> m_window;
+		Ref<Interface::Canvas> m_canvas;
+		tcod::Tileset m_tileset;
+
+		World::World* m_world;
 
 	public:
 		Game(TCOD_ContextParams params, int width, int height);
 		~Game();
 		int run();
 		void quit(int code = 0);
-		void setFullscreen(bool fullscreen);
-		bool isKeyDown(SDL_Keycode key);
-		bool isKeyPressed(SDL_Keycode key);
+		void set_fullscreen(bool fullscreen);
 	private:
-		void handleEvents();
-		void doState();
-		
-		static SDL_HitTestResult HitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
+		void handle_events();
+		void set_title(const std::string &title);
 
-		void doStateCSFT();
-		void doStateTITL();
+		static SDL_HitTestResult HitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
 	};
 }

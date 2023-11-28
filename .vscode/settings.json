@@ -104,7 +104,9 @@
     "xtree": "cpp",
     "xutility": "cpp",
     "fstream": "cpp",
-    "set": "cpp"
+    "set": "cpp",
+    "*.idl": "cpp",
+    "typeindex": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

@@ -49,10 +49,10 @@ namespace RYSIC::Interface
 		~Component() = default;
 		
 		virtual void render(TCOD_Console&) = 0;
-		virtual bool handleEvent(SDL_Event&, Pos&) { return false; };
+		virtual bool handle_event(SDL_Event&, Pos&) { return false; };
 
-		const Container* getParent() const { return parent; };
-		const Pos getAbsolutePosition() const;
+		const Container* get_parent() const { return parent; };
+		const Pos get_abs_pos() const;
 
 		friend class Container;
 		friend class Window;
@@ -72,12 +72,12 @@ namespace RYSIC::Interface
 		{}
 
 		virtual void render(TCOD_Console &console) override;
-		virtual bool handleEvent(SDL_Event &event, Pos &screen_pos) override;
-		virtual const Pos getAbsolutePositionOfChild(const Component* child) const;
+		virtual bool handle_event(SDL_Event &event, Pos &screen_pos) override;
+		virtual const Pos get_abs_pos_of_child(const Component* child) const;
 
-		bool Add(const Ref<Component> comp);
-		bool Remove(const Ref<Component> comp);
-		void RemoveAll();
+		bool add(const Ref<Component> comp);
+		bool remove(const Ref<Component> comp);
+		void remove_all();
 	};
 
 	class Frame : public Container
@@ -106,7 +106,7 @@ namespace RYSIC::Interface
 		{}
 
 		virtual void render(TCOD_Console &console) override;
-		virtual const Pos getAbsolutePositionOfChild(const Component* child) const override;
+		virtual const Pos get_abs_pos_of_child(const Component* child) const override;
 	};
 
 	class Window : public Frame
@@ -125,15 +125,15 @@ namespace RYSIC::Interface
 		{}
 
 		virtual void render(TCOD_Console &console) override;
-		virtual bool handleEvent(SDL_Event &event, Pos &screen_pos) override;
+		virtual bool handle_event(SDL_Event &event, Pos &screen_pos) override;
 
-		virtual const Pos getAbsolutePositionOfChild(const Component* child) const override;
+		virtual const Pos get_abs_pos_of_child(const Component* child) const override;
 
-		bool AddWidget(const Ref<Component> comp);
-		bool RemoveWidget(const Ref<Component> comp);
-		void RemoveAllWidgets();
+		bool add_widget(const Ref<Component> comp);
+		bool remove_widget(const Ref<Component> comp);
+		void remove_all_widgets();
 
-		SDL_HitTestResult getHitTestResult(const Pos& mouse);
+		SDL_HitTestResult get_hittest_result(const Pos& mouse);
 	};
 
 	class Label : public Component
@@ -145,7 +145,7 @@ namespace RYSIC::Interface
 
 	public:
 		Label() = default;
-		Label(const Pos &_pos, std::string _text)
+		Label(const Pos &_pos, const std::string &_text)
 			: Component(_pos), text(_text)
 		{}
 		Label(const Pos &_pos, std::string _text, Color _fg, Color _bg)
@@ -167,25 +167,25 @@ namespace RYSIC::Interface
 	
 	public:
 		Button() = default;
-		Button(const Rect &_rect, std::string _label,
+		Button(const Rect &_rect, const std::string &_label,
 			Color _label_color, Color _color, Color _color_hover, Color _color_pressed,
 			std::function<void(int, int, Button* const)> _on_pressed)
 			: Component(_rect), label(_label), label_color(_label_color), color(_color),
 			color_hover(_color_hover), color_pressed(_color_pressed), on_pressed(_on_pressed)
 		{}
-		Button(const Rect &_rect, std::string _label,
+		Button(const Rect &_rect, const std::string &_label,
 			Color _label_color, TCOD_ColorRGB _color, std::function<void(int, int, Button* const)> _on_pressed)
 			: Button(_rect, _label, _label_color, _color, LightenColor(_color), DarkenColor(_color), _on_pressed)
 		{}
 
 		virtual void render(TCOD_Console &console) override;
-		virtual bool Button::handleEvent(SDL_Event &event, Pos &screen_pos) override;
+		virtual bool Button::handle_event(SDL_Event &event, Pos &screen_pos) override;
 	};
 
 	class Canvas : public Container
 	{
 	public:
-		tcod::Console console;
+		tcod::Console canvas;
 
 	public:
 		Canvas() = default;
@@ -194,5 +194,45 @@ namespace RYSIC::Interface
 		virtual void render(TCOD_Console &console) override;
 		void clear();
 	};
-	
+
+	class TypingLabel : public Label
+	{
+	public:
+		bool started = false, completed = false;
+		unsigned long long start_time, delay = 50;
+		std::string current_text;
+
+	public:
+		TypingLabel() = default;
+		TypingLabel(const Pos &_pos, const std::string &_text)
+			: Label(_pos, _text)
+		{ start(); }
+		TypingLabel(const Pos &_pos, const std::string &_text, Color _fg, Color _bg)
+			: Label(_pos, _text, _fg, _bg)
+		{ start(); }
+
+		bool start();
+		bool reset();
+		bool show();
+		virtual void render(TCOD_Console &console) override;
+	};
+
+	class ProgressBar : public Label
+	{
+	private:
+		float value = 0.5f;
+		Color label_color;
+		enum Direction { HORIZONTAL, VERTICAL } direction = HORIZONTAL;
+
+	public:
+		ProgressBar() = default;
+		ProgressBar(const Pos &_pos, const std::string &_text, Color _label_color, Color _fg, Color _bg)
+			: Label(_pos, _text, _fg, _bg), label_color(_label_color)
+		{}
+
+		virtual void render(TCOD_Console &console) override;
+
+		void set(float _value) { value = CLAMP(_value, 0.0f, 1.0f); };
+		const float get() const { return value; };
+	};
 }

@@ -49,11 +49,14 @@
     "RYSIC",
     "SDLK",
     "TITL",
+    "Taffer",
     "Topbar",
     "blit",
     "cerisoft",
     "keysym",
-    "subconsole"
+    "stringf",
+    "subconsole",
+    "xywh"
   ],
   "import": [],
   "enableFiletypes": [

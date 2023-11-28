@@ -15,8 +15,10 @@ namespace RYSIC
 			C_GRAY3 = {120, 120, 120},
 			C_GRAY4 = {200, 200, 200},
 			C_WHITE = {255, 255, 255},
-			C_RED = {220, 50, 50},
+			C_RED = {255, 0, 0},
+			C_DARK_GREEN = {20, 120, 20},
 			C_RED_LIGHT = {255, 80, 80},
+			C_YELLOW = {255, 255, 0},
 			C_CERISOFT = {255, 100, 0};
 	
 	TCOD_ColorRGB GetColorFraction(const TCOD_ColorRGB col, int tone_idx, int tone_cnt);
