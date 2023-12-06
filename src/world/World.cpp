@@ -28,6 +28,7 @@ namespace RYSIC::World
 		{
 			m_player->pos = player_xy;
 			m_current_map->add(m_player);
+			m_current_map->update_fov(m_player);
 		}
 	}
 
@@ -40,7 +41,7 @@ namespace RYSIC::World
 
 	void World::handle_action(Action *action)
 	{
-		if(action == nullptr)
+		if(action == nullptr || m_current_map == nullptr)
 			return;
 		action->perform(this, m_player);
 	}

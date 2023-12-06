@@ -1,7 +1,10 @@
 #include "Map.hpp"
 
+#include <queue>
+
 #include "Actions.hpp"
 #include "screen/ScreenUtil.hpp"
+#include "Fov.hpp"
 
 namespace RYSIC::World
 {
@@ -9,8 +12,12 @@ namespace RYSIC::World
 	Map::Map( unsigned int width, unsigned int height, const Tile& fill_tile)
 		: m_width(width), m_height(height)
 	{
-		m_tiles = new Tile[m_width * m_height];
-		std::fill_n(m_tiles, m_width * m_height, fill_tile);
+		const int tile_cnt = m_width * m_height;
+
+		m_tiles = new Tile[tile_cnt];
+		std::fill_n(m_tiles, tile_cnt, fill_tile);
+		m_tile_attributes = new TileAttributes[tile_cnt];
+		amnesia();
 	}
 
 	Map::~Map()
@@ -18,6 +25,7 @@ namespace RYSIC::World
 		for(Entity* ent : m_entities)
 			delete ent;
 		m_entities.clear();
+		delete m_tile_attributes;
 		delete m_tiles;
 	}
 
@@ -25,6 +33,13 @@ namespace RYSIC::World
 	{
 		if(in_bounds(xy))
 			return &m_tiles[xy.x + (xy.y * m_width)];
+		return nullptr;
+	}
+
+	TileAttributes* Map::attrib_at(const Pos &xy) const
+	{
+		if(in_bounds(xy))
+			return &m_tile_attributes[xy.x + (xy.y * m_width)];
 		return nullptr;
 	}
 	
@@ -49,9 +64,131 @@ namespace RYSIC::World
 	{
 		for(int x = 0; x < (int) m_width; x++)
 			for(int y = 0; y < (int) m_height; y++)
-				Util::Screen::set_char(console, x, y, at({x, y})->gfx);
-
+			{
+				Tile* tile = at({x, y});
+				TileAttributes* tile_attrib = attrib_at({x, y});
+				Glyph gfx;
+				if(tile_attrib->visible)
+					gfx = tile->gfx;
+				else if(tile_attrib->explored)
+					gfx = tile->dark_gfx;
+				else
+					gfx = GLYPH_UNSEEN;
+				Util::Screen::set_char(console, x, y, gfx);
+			}
 		for(auto ent : m_entities)
 			ent->render(console);
+	}
+
+	void Map::update_fov(Entity* viewer)
+	{
+		if(viewer == nullptr)
+			return;
+
+		blind(); // clear visible tiles
+
+		auto _blocks = [&](const Pos& xy)->bool { return blocks_sight(xy); };
+		auto _reveal = [&](const Pos& xy)->void { reveal(xy); };
+		FOV::compute(viewer->pos, _blocks, _reveal, viewer->get_vision_radius());
+	}
+
+	void Map::nightmare_eyes()
+	{
+		const int tile_cnt = m_width * m_height;
+		std::fill_n(m_tile_attributes, tile_cnt, TileAttributes{true, true});
+	}
+
+	void Map::amnesia()
+	{
+		const int tile_cnt = m_width * m_height;
+		std::fill_n(m_tile_attributes, tile_cnt, TileAttributes{false, false});
+	}
+
+	void Map::blind()
+	{
+		const int tile_cnt = m_width * m_height;
+		for(int i = 0; i < tile_cnt; i++)
+			m_tile_attributes[i].visible = false;
+	}
+
+	void Map::flood_reveal(const Pos &origin)
+	{
+		bool* vis = new bool[m_width * m_height];
+		std::fill(vis, &vis[m_width * m_height], false);
+
+		std::queue<Pos> q;
+		q.push(origin);
+		vis[origin.x + (origin.y * m_width)] = true;
+
+		while(!q.empty())
+		{
+			Pos pos = q.front();
+			remember(pos);
+			q.pop();
+			if(blocks_sight(pos))
+				continue;
+			static const Pos AROUND[8] = {Pos{-1, -1}, Pos{0, -1}, Pos{1, -1}, Pos{-1, 0}, Pos{1, 0}, Pos{-1, 1}, Pos{0, 1}, Pos{1, 1}};
+			for(int i = 0; i < 8; i++)
+			{
+				Pos next = pos + AROUND[i];
+				if(in_bounds(next) && !vis[next.x + (next.y * m_width)])
+				{
+					q.push(next);
+					vis[next.x + (next.y * m_width)] = true;
+				}
+			}
+		}
+	}
+
+	bool Map::reveal(const Pos &xy)
+	{
+		TileAttributes* ta = attrib_at(xy);
+		if(ta != nullptr)
+		{
+			bool old = ta->visible;
+			ta->explored = ta->visible = true;
+			return old != true;
+		}
+		return false;
+	}
+
+	bool Map::hide(const Pos & xy)
+	{
+		TileAttributes* ta = attrib_at(xy);
+		if(ta != nullptr)
+		{
+			bool old = ta->visible;
+			ta->visible = false;
+			return old != false;
+		}
+		return false;
+	}
+
+	bool Map::remember(const Pos &xy)
+	{
+		TileAttributes* ta = attrib_at(xy);
+		if(ta != nullptr)
+		{
+			bool old = ta->explored;
+			ta->explored = true;
+			return old != true;
+		}
+		return false;
+	}
+
+	bool Map::forget(const Pos & xy)
+	{
+		TileAttributes* ta = attrib_at(xy);
+		if(ta != nullptr)
+			ta->explored = false;
+		return false;
+	}
+
+	bool Map::blocks_sight(const Pos& xy) const
+	{
+		Tile* tile = at(xy);
+		if(tile)
+			return !tile->transparent;
+		return true;
 	}
 }

@@ -40,6 +40,8 @@
   ],
   "ignoreWords": [
     "Andux",
+    "Bresenham",
+    "COLCTRL",
     "CSFT",
     "HITTEST",
     "MOUSEBUTTONDOWN",
@@ -48,6 +50,7 @@
     "OPTN",
     "RYSIC",
     "SDLK",
+    "STRVERSIONNAME",
     "TITL",
     "Taffer",
     "Topbar",

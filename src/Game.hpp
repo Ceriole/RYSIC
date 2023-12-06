@@ -33,6 +33,7 @@ namespace RYSIC
 	private:
 		void handle_events();
 		void set_title(const std::string &title);
+		void regenerate_map();
 
 		static SDL_HitTestResult HitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
 	};

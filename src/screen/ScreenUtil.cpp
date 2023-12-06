@@ -17,7 +17,7 @@ namespace RYSIC::Util::Screen
 		if(bg.has_value()) tile.bg = bg.value();
 	}
 
-	void set_char(TCOD_Console &console, int x, int y, const Character &gfx)
+	void set_char(TCOD_Console &console, int x, int y, const Glyph &gfx)
 	{
 		set_char(console, x, y, gfx.ch, gfx.fg, gfx.bg);
 	}

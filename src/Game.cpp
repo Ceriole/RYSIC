@@ -43,6 +43,19 @@ namespace RYSIC
 			m_window->add(m_canvas);
 			m_window->add_widget(close_button);
 			m_window->add_widget(btn_fullscreen);
+			TCODConsole::setColorControl(TCOD_COLCTRL_1, {0, 255, 255}, {0, 127, 127});
+			m_window->add_widget(CreateRef<Interface::Label>(Pos{0, m_window->rect.h - 3},
+				tcod::stringf("Use %c[wasd]%c, %c[hjkl]%c or %c[numpad]%c to move.\nPress %c[r]%c to reveal map. Press %c[f]%c to forget.\nPress %c[space]%c to generate a new map. Press %c[esc]%c to exit.",
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
+					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP
+					),
+				C_WHITE, std::nullopt));
+			
 			SDL_SetWindowHitTest(m_context.get_sdl_window(), Game::HitTestCallback, this);
 
 			m_world = new World::World(new World::Entity(
@@ -51,15 +64,7 @@ namespace RYSIC
 					));
 
 			srand(time(NULL) % 1000);
-
-			Pos player_pos;
-			auto map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, &player_pos);
-			/*map->add(
-				new World::Entity(
-					{25, 20},
-					{0x3104, {C_YELLOW}, {C_BLACK}})
-			);*/
-			m_world->set_map(map, player_pos);
+			regenerate_map();
 
 			set_title("RYSIC");
 			set_fullscreen(false);
@@ -111,7 +116,7 @@ namespace RYSIC
 		m_window->drawTopbar = !m_fullscreen;
 		if(m_fullscreen)
 			SDL_SetWindowFullscreen(m_context.get_sdl_window(), SDL_WINDOW_FULLSCREEN_DESKTOP);
-		else
+		else	
 			SDL_SetWindowFullscreen(m_context.get_sdl_window(), 0);
 	}
 
@@ -126,10 +131,7 @@ namespace RYSIC
 				continue;
 			
 			if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
-			{
-				auto new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, &temp);
-				m_world->set_map(new_map, temp);
-			}
+				regenerate_map();
 			
 			auto action = World::GetActionFromEvent(event);
 			switch(action->type())
@@ -146,6 +148,13 @@ namespace RYSIC
 	{
 		SDL_SetWindowTitle(m_context.get_sdl_window(), title.c_str());
 		m_window->title = title;
+	}
+
+	void Game::regenerate_map()
+	{
+		Pos temp;
+		auto new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, &temp);
+		m_world->set_map(new_map, temp);
 	}
 
 	SDL_HitTestResult Game::HitTestCallback(SDL_Window*, const SDL_Point *area, void *data)

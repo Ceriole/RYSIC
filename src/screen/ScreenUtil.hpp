@@ -16,7 +16,7 @@ namespace RYSIC::Util::Screen
 	};
 
 	void set_char(TCOD_Console &console, int x, int y, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg);
-	void set_char(TCOD_Console &console, int x, int y, const Character& gfx);
+	void set_char(TCOD_Console &console, int x, int y, const Glyph& gfx);
 	void draw_hline(TCOD_Console &console, int x, int y, int w, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg);
 	void draw_vline(TCOD_Console &console, int x, int y, int h, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg);
 	void draw_rect(TCOD_Console &console, const std::array<int, 4> &rect, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg);

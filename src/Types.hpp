@@ -62,6 +62,16 @@ namespace RYSIC
 
 		Pos clamp(int min, int max) const
 		{ return { CLAMP(x, min, max), CLAMP(y, min, max) }; }
+
+		bool zero() const
+		{ return (x == 0 && y == 0); }
+		bool positive() const
+		{ return (x > 0 && y > 0); }
+		bool negative() const
+		{ return (x < 0 && y < 0); }
+
+		double distance(const Pos& b) const
+		{ return sqrt(pow(b.x - x, 2) + pow(b.y - y, 2)); }
 	};
 
 	struct Rect
@@ -95,13 +105,13 @@ namespace RYSIC
 		const Rect inner(int thickness = 1) const { return {x + thickness, y + thickness, w - (thickness * 2), h - (thickness * 2)}; }
 	};
 
-	struct Character
+	struct Glyph
 	{
 		int ch = 0;
 		Color fg = std::nullopt, bg = std::nullopt;
 
-		bool operator==(const Character& rhs) const
-		{ return memcmp(this, &rhs, sizeof(Character)); }
+		bool operator==(const Glyph& rhs) const
+		{ return memcmp(this, &rhs, sizeof(Glyph)); }
 	};
 	
 }

@@ -106,7 +106,8 @@
     "fstream": "cpp",
     "set": "cpp",
     "*.idl": "cpp",
-    "typeindex": "cpp"
+    "typeindex": "cpp",
+    "queue": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

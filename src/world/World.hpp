@@ -15,11 +15,13 @@ namespace RYSIC::World
 		World(Entity* player);
 		~World();
 
-		Map* get_map() const { return m_current_map; };
+		Map* get_map() const { return m_current_map; }
+		Entity* get_player() const { return m_player; }
 
 		void set_map(Map* map, const Pos& player_xy);
 		void render(TCOD_Console &console) const;
 		void handle_action(Action* action);
+
 	};
 
 }

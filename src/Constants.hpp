@@ -32,4 +32,7 @@ namespace RYSIC::Constants
 		DEFAULT_WIDTH = 60,
 		DEFAULT_HEIGHT = 35,
 		DEFAULT_PIXEL_SIZE = 1;
+	
+	// MAP GEN
+	constexpr int ROOM_GEN_MAX_ATTEMPTS = 10;
 }

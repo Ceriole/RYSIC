@@ -12,7 +12,7 @@ namespace RYSIC::World
 	{
 		enum Type
 		{
-			NONE, EXIT, MOVEMENT
+			NONE, EXIT, MOVEMENT, VISIBILITY
 		};
 
 		virtual Type type() const { return NONE; };
@@ -40,6 +40,19 @@ namespace RYSIC::World
 
 		virtual Type type() const override { return MOVEMENT; };
 		Direction dir() const;
+
+		virtual void perform(World* world, Entity* target) const override;
+	};
+
+	struct VisibilityAction : public Action
+	{
+		const enum VisType { REVEAL, HIDE, OMNIPOTENT } viz_type;
+
+		VisibilityAction(VisType _viz_type = REVEAL)
+			: viz_type(_viz_type)
+		{}
+
+		virtual Type type() const override { return VISIBILITY; };
 
 		virtual void perform(World* world, Entity* target) const override;
 	};

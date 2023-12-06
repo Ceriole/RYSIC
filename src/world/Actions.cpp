@@ -42,6 +42,10 @@ namespace RYSIC::World
 			case SDLK_PERIOD:
 			case SDLK_KP_5:
 				return new MovementAction(0, 0); // move in place (wait a turn)
+			case SDLK_r:
+				return new VisibilityAction(VisibilityAction::REVEAL); // reveal 
+			case SDLK_f:
+				return new VisibilityAction(VisibilityAction::HIDE); // hide 
 			}
 		}
 		return new Action();
@@ -80,10 +84,31 @@ namespace RYSIC::World
 		{
 			auto target_tile = world->get_map()->at(target->pos + Pos(dx, dy));
 			if(target_tile->walkable)
+			{
 				target->move(dx, dy);
+				if(world->get_player() == target)
+					world->get_map()->update_fov(target);
+			}
 		}
 		else
 			target->move(dx, dy);
 	}
-	
+
+	void VisibilityAction::perform(World *world, Entity *target) const
+	{
+		if(world->get_map() != nullptr)
+		{
+			switch (viz_type)
+			{
+			case REVEAL: world->get_map()->flood_reveal(target->pos); break;
+			case HIDE:
+				world->get_map()->amnesia();
+				if(world->get_player() == target)
+					world->get_map()->update_fov(target);
+				break;
+			case OMNIPOTENT: world->get_map()->nightmare_eyes(); break;
+			}
+		}
+	}
+
 }

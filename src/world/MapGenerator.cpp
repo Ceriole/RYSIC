@@ -1,9 +1,8 @@
 #include "MapGenerator.hpp"
 
 #include "Types.hpp"
-
-
-#define SIGN(N) ((N) < 0 ? -1 : ((N) > 0 ? 1 : 0))
+#include "screen/LineUtil.hpp"
+#include "Constants.hpp"
 
 namespace RYSIC::World::MapGenerator
 {
@@ -29,33 +28,9 @@ namespace RYSIC::World::MapGenerator
 
 	void carve_line(Map* map, const Pos& a, const Pos& b, const Tile& tile)
 	{
-		int dx = b.x - a.x, dy = b.y - a.y;
-		int sx = SIGN(dx), sy = SIGN(dy);
-		dx = abs(dx), dy = abs(dy);
-		int d = MAX(dx, dy);
-		double r = d / 2;
-		Pos xy = a;
-
-		if(dx > dy)
-		{
-			for(int i = 0; i < d; i++)
-			{
-				set_tile(map, xy, tile);
-				xy.x += sx; r += dy;
-				if(r >= dx)
-					xy.y += sy, r -= dx;
-			}
-		}
-		else
-		{
-			for(int i = 0; i < d; i++)
-			{
-				set_tile(map, xy, tile);
-				xy.y += sy; r += dx;
-				if(r >= dy)
-					xy.y += sx, r -= dy;
-			}
-		}
+		std::vector<Pos> line = Util::Line::Walk(a, b);
+		for(auto p : line)
+			set_tile(map, p, tile);
 	}
 
 	void carve_tunnel(Map* map, const Pos& a, const Pos& b, const Tile& tile)
@@ -73,38 +48,47 @@ namespace RYSIC::World::MapGenerator
 	Map* GenerateDungeon(unsigned int width, unsigned int height, unsigned int max_rooms,
 		unsigned int room_min_size, unsigned int room_max_size, Pos* player_pos)
 	{
-		Map* map = new Map(width, height, TILE_WALL);
+		Map* map = new Map(width, height, TILE_WALL);	// create map object
 
-		std::vector<Rect> rooms;
-		for(int r = 0; r < (int) max_rooms; r++)
+		std::vector<Rect> rooms;						// room array
+		unsigned int r = 0, t = 0; 						// room count, tries counter
+		while(r < (int) max_rooms)						// loop until room count == max_rooms
 		{
-			int rw = room_min_size + (rand() % (room_max_size - room_min_size));
-			int rh = room_min_size + (rand() % (room_max_size - room_min_size));
+			int rw = room_min_size + (rand() % (room_max_size - room_min_size));	// roll for room width
+			int rh = room_min_size + (rand() % (room_max_size - room_min_size));	// roll for room height
+			int rx = rand() % (width - rw - 1);			// roll for room x pos
+			int ry = rand() % (height - rh - 1);		// roll for room y pos
 
-			int rx = rand() % (width - rw - 1);
-			int ry = rand() % (height - rh - 1);
+			Rect room = {rx, ry, rw, rh};				// create room object (struct)
 
-			Rect room = {rx, ry, rw, rh};
-
-			bool intersects = false;
+			bool collision = false;						// room collision flag
 			for(auto old_room : rooms)
 				if(room.intersects(old_room))
-				{ intersects = true; break; }
-			if(intersects)
-				continue;
+				{ collision = true; break; }
+			
+			t++;										// increment tries
+			if(t == Constants::ROOM_GEN_MAX_ATTEMPTS)				// if tries == ROOM_GEN_MAX_ATTEMPTS
+			{ t = 0; r++; continue; }					// increment rooms and continue (skip room)
 
-			carve(map, room.inner(), TILE_FLOOR);
+			if(collision)								// if room collides with any other rooms,
+				continue;								// skip carving the room and retry to reroll the room
 
-			if(r == 0)
+			t = 0;										// reset tries
+			carve(map, room.inner(), TILE_FLOOR);		// set map tiles where room is to TILE_FLOOR
+
+			if(r == 0)									// if this is the first room, put the player there
 				(*player_pos) = room.center();
-			else if(r == max_rooms - 1)
+			else if(r == max_rooms - 1)					// otherwise, if this is the last room,
+														// make a tunnel to the first room
 				carve_tunnel(map, rooms.front().center(), room.center(), TILE_FLOOR);
-			else
+			else										// if the above two conditions are false,
+														// make a tunnel from the previous room to the current one
 				carve_tunnel(map, rooms.back().center(), room.center(), TILE_FLOOR);
 			
-			rooms.push_back(room);
+			rooms.push_back(room);						// add room to room array (previously generated room list)
+			r++;										// increment room count
 		}
 
-		return map;
+		return map;										// return the map object with the rooms carved.
 	}
 }
