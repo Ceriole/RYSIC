@@ -31,7 +31,14 @@ namespace RYSIC::World::FOV
 	double slope(const Pos& tile);
 	bool is_symmetric(const Row& row, const Pos& tile);
 
+	bool visible_between(const Pos& origin, const Pos& target, std::function<bool(const Pos&)> blocks_sight,
+		double max_distance);
+
+	void compute_quadrant(const Pos &origin, Quadrant::Cardinal quadrant,
+		std::function<bool(const Pos &)> blocks_sight, std::function<void(const Pos &)> set_visible,
+		double max_distance = 0);
 	void compute(const Pos& origin, std::function<bool(const Pos&)> blocks_sight,
 		std::function<void(const Pos&)> set_visible, double max_distance = 0);
+	
 
 }

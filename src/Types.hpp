@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+
 #include "screen/Colors.hpp"
 
 namespace RYSIC
@@ -86,9 +88,9 @@ namespace RYSIC
 			: x(xywh[0]), y(xywh[1]), w(xywh[2]), h(xywh[3])
 		{}
 
-		operator std::array<int, 4>() const { return {x, y, w, h}; }
+		inline operator std::array<int, 4>() const { return {x, y, w, h}; }
 
-		bool intersects(const Rect& rect) const
+		inline bool intersects(const Rect& rect) const
 		{
 			const int
 				a_x1 = x,				a_y1 = y,
@@ -101,8 +103,8 @@ namespace RYSIC
 				a_y2 < b_y1 || a_y1 > b_y2);
 		}
 
-		const Pos center() const { return {x + (w / 2), y + (h / 2)}; }
-		const Rect inner(int thickness = 1) const { return {x + thickness, y + thickness, w - (thickness * 2), h - (thickness * 2)}; }
+		inline const Pos center() const { return {x + (w / 2), y + (h / 2)}; }
+		inline const Rect inner(int thickness = 1) const { return {x + thickness, y + thickness, w - (thickness * 2), h - (thickness * 2)}; }
 	};
 
 	struct Glyph
@@ -110,8 +112,36 @@ namespace RYSIC
 		int ch = 0;
 		Color fg = std::nullopt, bg = std::nullopt;
 
-		bool operator==(const Glyph& rhs) const
+		inline bool operator==(const Glyph& rhs) const
 		{ return memcmp(this, &rhs, sizeof(Glyph)); }
+
+		Glyph dark(float factor = 0.5f) const
+		{
+			Color n_fg, n_bg;
+			if(fg.has_value())
+				n_fg = TCOD_color_lerp(fg.value(), {0,0,0}, 1.0f - factor);
+			if(bg.has_value())
+				n_bg = TCOD_color_lerp(bg.value(), {0,0,0}, 1.0f - factor);
+			return {ch, fg.has_value() ? n_fg : fg, bg.has_value() ? n_bg : bg};
+		}
+
+		Glyph bright(float factor = 0.5f) const
+		{
+			Color n_fg, n_bg;
+			if(fg.has_value())
+				n_fg = TCOD_color_lerp(fg.value(), {255,255,255}, factor);
+			if(bg.has_value())
+				n_bg = TCOD_color_lerp(bg.value(), {255,255,255}, factor);
+			return {ch, fg.has_value() ? n_fg : fg, bg.has_value() ? n_bg : bg};
+		}
+
+		Glyph flash(float factor = 0.5f) const
+		{
+			float time = SDL_GetTicks64() / 1000.0f;
+			float seconds = 0;
+			float sub_second = modff(time, &seconds);
+			return {((sub_second <= factor) ? ' ' : ch), fg, bg};
+		}
 	};
 	
 }

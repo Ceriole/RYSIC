@@ -35,4 +35,15 @@ namespace RYSIC::Constants
 	
 	// MAP GEN
 	constexpr int ROOM_GEN_MAX_ATTEMPTS = 10;
+
+	// GRAPHICS
+	constexpr float UNEXPLORED_DARK_FACTOR = 1.0f / 3.0f;
+
+	// WORLD
+	constexpr unsigned long WORLD_TICS_SECOND = 100; // how long a 'world time' second is in world tics 
+	constexpr size_t WORLD_TIME_STRLEN = 26;
+	constexpr const char* WORLD_TIME_FORMAT = "Year %3u, Day %3u %2u:%2u:%2u";
+
+	// MESSAGES
+	constexpr const char* MSG_NO_ACTION_FOR_KEY = "Unknown action '%s'";
 }

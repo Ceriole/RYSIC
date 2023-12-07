@@ -12,7 +12,7 @@ namespace RYSIC::World
 	struct Tile
 	{
 		bool walkable, transparent;
-		Glyph gfx, dark_gfx;
+		Glyph gfx;
 
 		bool operator==(const Tile& rhs) const
 		{ return memcmp(this, &rhs, sizeof(Tile)); }
@@ -26,11 +26,11 @@ namespace RYSIC::World
 	constexpr Glyph GLYPH_UNSEEN =
 		{' ', C_WHITE, std::nullopt};
 	constexpr Tile TILE_VOID =
-		{false, false, {' ', std::nullopt, std::nullopt}, {' ', std::nullopt, std::nullopt}};
+		{false, false, {' ', std::nullopt, std::nullopt}};
 	constexpr Tile TILE_WALL =
-		{false, false, {0x3003, C_GRAY4, C_BLACK}, {0x3003, C_GRAY1, C_BLACK}};
+		{false, false, {0x3003, C_GRAY4, C_BLACK}};
 	constexpr Tile TILE_FLOOR =
-		{true, true, {0x3000, {{20, 120, 20}}, {{0, 20, 0}}}, {0x3000, {{10, 60, 10}}, {{0, 5, 0}}}};
+		{true, true, {0x3000, {{20, 120, 20}}, {{0, 20, 0}}}};
 
 	class Map
 	{
@@ -49,6 +49,8 @@ namespace RYSIC::World
 		Map* add(Entity* entity);
 		Map* remove(Entity* entity);
 		bool in_bounds(const Pos& xy) const;
+		std::set<Entity*> entities_at(const Pos& xy) const;
+		Entity* Map::blocking_entity_at(const Pos& xy) const; 
 
 		void render(TCOD_Console &console) const;
 
@@ -56,17 +58,21 @@ namespace RYSIC::World
 		unsigned int height() const { return m_height; }
 
 		void update_fov(Entity* viewer);
-		void nightmare_eyes(); // rip A.H.
+		void nightmare_eyes(const Pos& origin = {-1, -1}); // rip A.H.
 		void blind();
 		void amnesia();
 
-		void flood_reveal(const Pos& origin);
+		void flood_reveal(const Pos& origin, bool all_visible = false);
 		bool reveal(const Pos& xy);
 		bool hide(const Pos& xy);
 		bool remember(const Pos& xy);
 		bool forget(const Pos& xy);
 
+		bool can_see(const Pos& origin, const Pos& target, double max_distance = 0) const;
+
 		bool blocks_sight(const Pos& xy) const;
+
+		void progress(unsigned long tics);
 
 		Tile& operator[](int index)
 		{

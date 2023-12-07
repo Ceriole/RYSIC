@@ -6,6 +6,7 @@
 #include "screen/ScreenUtil.hpp"
 #include "world/Map.hpp"
 #include "world/MapGenerator.hpp"
+#include "world/StaticEntities.hpp"
 
 namespace RYSIC
 {
@@ -58,10 +59,7 @@ namespace RYSIC
 			
 			SDL_SetWindowHitTest(m_context.get_sdl_window(), Game::HitTestCallback, this);
 
-			m_world = new World::World(new World::Entity(
-						{},
-						{0x3100, {C_WHITE}, std::nullopt}
-					));
+			m_world = new World::World(new World::Entity(World::EntityDefintions::PLAYER));
 
 			srand(time(NULL) % 1000);
 			regenerate_map();
@@ -133,14 +131,15 @@ namespace RYSIC
 			if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
 				regenerate_map();
 			
-			auto action = World::GetActionFromEvent(event);
-			switch(action->type())
-			{
-			case World::Action::Type::EXIT:
-				quit(); break;
-			default:
-				m_world->handle_action(action); break;
-			}
+			auto action = World::GetActionFromEvent(event, m_world);
+			if(action)
+				switch(action->type())
+				{
+				case World::Action::Type::EXIT:
+					quit(); break;
+				default:
+					m_world->handle_action(action); break;
+				}
 		}
 	}
 
@@ -153,7 +152,7 @@ namespace RYSIC
 	void Game::regenerate_map()
 	{
 		Pos temp;
-		auto new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, &temp);
+		World::Map* new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, 2, &temp);
 		m_world->set_map(new_map, temp);
 	}
 

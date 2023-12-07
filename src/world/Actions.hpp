@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "Types.hpp"
+
 namespace RYSIC::World
 {
 
@@ -12,39 +14,77 @@ namespace RYSIC::World
 	{
 		enum Type
 		{
-			NONE, EXIT, MOVEMENT, VISIBILITY
+			EXIT, DIRECTIONAL, MOVEMENT, ATTACK, VISIBILITY
 		};
 
-		virtual Type type() const { return NONE; };
+		virtual Type type() const = 0;
 
-		virtual void perform(World* world, Entity* target) const;
+		virtual void perform(World* world, Entity* target) const = 0;
 	};
 
-	struct ExitAction : public Action
+	struct ExitAction : virtual public Action
 	{
 		virtual Type type() const override { return EXIT; };
+
+		virtual void perform(World*, Entity*) const {};
 	};
 
-	struct MovementAction : public Action
+	struct DirectionalAction : virtual public Action
 	{
-		const int dx, dy;
+		const Pos target_pos;
 		enum Direction
 		{
 			NONE, NORTH, SOUTH, EAST, WEST,
 			NORTHWEST, NORTHEAST, SOUTHWEST, SOUTHEAST
 		};
 
-		MovementAction(int _dx, int _dy)
-			: dx(_dx), dy(_dy)
+		DirectionalAction(const Pos& _target_pos)
+			: target_pos(_target_pos)
 		{}
 
-		virtual Type type() const override { return MOVEMENT; };
+		virtual Type type() const = 0;
 		Direction dir() const;
+
+		virtual void perform(World* world, Entity* target) const = 0;
+	};
+
+	struct BumpAction : virtual public DirectionalAction
+	{
+
+		BumpAction(const Pos& _target_pos)
+			: DirectionalAction(_target_pos)
+		{}
+
+		virtual Type type() const override { return ATTACK; };
 
 		virtual void perform(World* world, Entity* target) const override;
 	};
 
-	struct VisibilityAction : public Action
+	struct MovementAction : virtual public DirectionalAction
+	{
+
+		MovementAction(const Pos& _target_pos)
+			: DirectionalAction(_target_pos)
+		{}
+
+		virtual Type type() const override { return MOVEMENT; };
+
+		virtual void perform(World* world, Entity* target) const override;
+	};
+
+	struct MeleeAction : virtual public DirectionalAction
+	{
+
+		MeleeAction(const Pos& _target_pos)
+			: DirectionalAction(_target_pos)
+		{}
+
+		virtual Type type() const override { return ATTACK; };
+
+		virtual void perform(World* world, Entity* target) const override;
+	};
+
+	struct VisibilityAction : virtual public Action
 	{
 		const enum VisType { REVEAL, HIDE, OMNIPOTENT } viz_type;
 
@@ -57,5 +97,5 @@ namespace RYSIC::World
 		virtual void perform(World* world, Entity* target) const override;
 	};
 	
-	Action* GetActionFromEvent(SDL_Event &event);
+	Action* GetActionFromEvent(SDL_Event &event, World* world);
 }

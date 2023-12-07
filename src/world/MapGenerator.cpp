@@ -3,6 +3,7 @@
 #include "Types.hpp"
 #include "screen/LineUtil.hpp"
 #include "Constants.hpp"
+#include "StaticEntities.hpp"
 
 namespace RYSIC::World::MapGenerator
 {
@@ -45,8 +46,29 @@ namespace RYSIC::World::MapGenerator
 		carve_line(map, corner, b, tile);
 	}
 
+	void place_entities(Map* map, const Rect& room, unsigned int max_monsters)
+	{
+		int monster_cnt = rand() % max_monsters;
+		while(monster_cnt)
+		{
+			Pos pos = {
+				room.x + 2 + (rand() % (room.w - 4)),
+				room.y + 2 + (rand() % (room.h - 4))
+			};
+			if(!map->entities_at(pos).size())
+			{
+				if((rand() % 10) < 8)	// 80%
+					EntityDefintions::KOBOLD.spawn(map, pos);
+				else					// 20%
+					EntityDefintions::IMP.spawn(map, pos);
+				monster_cnt--;
+			}
+		}
+	}
+
 	Map* GenerateDungeon(unsigned int width, unsigned int height, unsigned int max_rooms,
-		unsigned int room_min_size, unsigned int room_max_size, Pos* player_pos)
+		unsigned int room_min_size, unsigned int room_max_size, unsigned int max_monsters_per_room,
+		Pos* player_pos)
 	{
 		Map* map = new Map(width, height, TILE_WALL);	// create map object
 
@@ -84,6 +106,9 @@ namespace RYSIC::World::MapGenerator
 			else										// if the above two conditions are false,
 														// make a tunnel from the previous room to the current one
 				carve_tunnel(map, rooms.back().center(), room.center(), TILE_FLOOR);
+			
+			if(r > 0)									// dont spawn monsters in starting room
+				place_entities(map, room, max_monsters_per_room);
 			
 			rooms.push_back(room);						// add room to room array (previously generated room list)
 			r++;										// increment room count

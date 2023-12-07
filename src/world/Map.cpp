@@ -5,6 +5,7 @@
 #include "Actions.hpp"
 #include "screen/ScreenUtil.hpp"
 #include "Fov.hpp"
+#include "Constants.hpp"
 
 namespace RYSIC::World
 {
@@ -55,9 +56,26 @@ namespace RYSIC::World
 		return this;
 	}
 
-	bool Map::in_bounds(const Pos &xy) const
+	bool Map::in_bounds(const Pos& xy) const
 	{
 		return xy.x >= 0 && xy.y >= 0 && xy.x < (int) m_width && xy.y < (int) m_height;
+	}
+
+	std::set<Entity*> Map::entities_at(const Pos& xy) const
+	{
+		std::set<Entity*> found;
+		for(auto ent : m_entities)
+			if(ent->pos == xy)
+				found.insert(ent);
+		return found;
+	}
+
+	Entity* Map::blocking_entity_at(const Pos& xy) const
+	{
+		for(auto ent : entities_at(xy))
+			if(ent->blocks_movement)
+				return ent;
+		return nullptr;
 	}
 
 	void Map::render(TCOD_Console &console) const
@@ -71,13 +89,14 @@ namespace RYSIC::World
 				if(tile_attrib->visible)
 					gfx = tile->gfx;
 				else if(tile_attrib->explored)
-					gfx = tile->dark_gfx;
+					gfx = tile->gfx.dark(Constants::UNEXPLORED_DARK_FACTOR);
 				else
 					gfx = GLYPH_UNSEEN;
 				Util::Screen::set_char(console, x, y, gfx);
 			}
 		for(auto ent : m_entities)
-			ent->render(console);
+			if(attrib_at(ent->pos)->visible)
+				ent->render(console);
 	}
 
 	void Map::update_fov(Entity* viewer)
@@ -92,10 +111,15 @@ namespace RYSIC::World
 		FOV::compute(viewer->pos, _blocks, _reveal, viewer->get_vision_radius());
 	}
 
-	void Map::nightmare_eyes()
+	void Map::nightmare_eyes(const Pos& origin)
 	{
-		const int tile_cnt = m_width * m_height;
-		std::fill_n(m_tile_attributes, tile_cnt, TileAttributes{true, true});
+		if(origin.positive())
+			flood_reveal(origin, true);
+		else
+		{
+			const int tile_cnt = m_width * m_height;
+			std::fill_n(m_tile_attributes, tile_cnt, TileAttributes{true, true});
+		}
 	}
 
 	void Map::amnesia()
@@ -111,7 +135,7 @@ namespace RYSIC::World
 			m_tile_attributes[i].visible = false;
 	}
 
-	void Map::flood_reveal(const Pos &origin)
+	void Map::flood_reveal(const Pos &origin, bool all_visible)
 	{
 		bool* vis = new bool[m_width * m_height];
 		std::fill(vis, &vis[m_width * m_height], false);
@@ -123,7 +147,10 @@ namespace RYSIC::World
 		while(!q.empty())
 		{
 			Pos pos = q.front();
-			remember(pos);
+			if(all_visible)
+				reveal(pos);
+			else
+				remember(pos);
 			q.pop();
 			if(blocks_sight(pos))
 				continue;
@@ -184,11 +211,22 @@ namespace RYSIC::World
 		return false;
 	}
 
+	bool Map::can_see(const Pos &origin, const Pos &target, double max_distance) const
+	{
+		auto _blocks = [&](const Pos& xy)->bool { return blocks_sight(xy); };
+		return FOV::visible_between(origin, target, _blocks, max_distance);
+	}
+
 	bool Map::blocks_sight(const Pos& xy) const
 	{
 		Tile* tile = at(xy);
 		if(tile)
 			return !tile->transparent;
 		return true;
+	}
+
+	void Map::progress(unsigned long tics)
+	{
+		// todo
 	}
 }
