@@ -8,6 +8,8 @@
 namespace RYSIC::World
 {
 
+	extern World* s_world_instance;
+
 	class World
 	{
 	private:

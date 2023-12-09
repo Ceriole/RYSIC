@@ -9,9 +9,12 @@
 namespace RYSIC::World
 {
 
+	World* s_world_instance;
+
 	World::World(Entity *player)
 		: m_player(player)
 	{
+		s_world_instance = this;
 	}
 
 	World::~World()

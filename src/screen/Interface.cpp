@@ -3,6 +3,7 @@
 #include "ScreenUtil.hpp"
 #include "Game.hpp"
 #include "Util.hpp"
+#include "Constants.hpp"
 
 namespace RYSIC::Interface
 {
@@ -421,8 +422,10 @@ namespace RYSIC::Interface
 			for(auto msg = m_log->end(); msg != m_log->begin();)
 			{
 				--msg;
+				if(msg->age() >= Constants::MESSAGE_AGE_OLD)
+					continue;
 				y -= tcod::get_height_rect(rect.w, msg->str());
-				tcod::print_rect(message_box, {0, y, rect.w, 0}, msg->str(), msg->fg_color(),  msg->bg_color());
+				tcod::print_rect(message_box, {0, y, rect.w, 0}, msg->str(), msg->fg_color(fg),  msg->bg_color(bg));
 				if(y < 1)
 					break;
 			}

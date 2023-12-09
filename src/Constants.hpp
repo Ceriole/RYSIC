@@ -43,6 +43,7 @@ namespace RYSIC::Constants
 	constexpr unsigned long WORLD_TICS_SECOND = 100; // how long a 'world time' second is in world tics 
 	constexpr size_t WORLD_TIME_STRLEN = 26;
 	constexpr const char* WORLD_TIME_FORMAT = "Year %3u, Day %3u %2u:%2u:%2u";
+	constexpr unsigned long WAIT_LENGTH = WORLD_TICS_SECOND * 5;
 
 	// MESSAGES
 	constexpr const char* MSG_NO_ACTION_FOR_KEY = "Unbound key '%s'";

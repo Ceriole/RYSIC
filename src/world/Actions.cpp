@@ -85,7 +85,15 @@ namespace RYSIC::World
 	{
 		if(world->get_map())
 		{
+			if(target_pos.zero())
+			{
+				world->announce("You wait a moment.", target->pos);
+				world->progress(Constants::WAIT_LENGTH);
+				return;
+			}
+
 			Pos dest = target->pos + target_pos;
+
 			auto target_tile = world->get_map()->at(dest);
 			auto target_blocking_entity = world->get_map()->blocking_entity_at(dest);
 			if(!target_tile->walkable)
@@ -103,13 +111,14 @@ namespace RYSIC::World
 
 	void MeleeAction::perform(World *world, Entity *target) const
 	{
-		Pos dest = target->pos + target_pos;
 		if(world->get_map())
 		{
+			Pos dest = target->pos + target_pos;
 			auto target_entity = world->get_map()->blocking_entity_at(dest);
 			if(!target_entity)
 				return;
-			world->announce(tcod::stringf("You bump against %s, with little effect.", target_entity->name.c_str()), target->pos);
+			if(target_entity != target)
+				world->announce(tcod::stringf("You bump against %s, with little effect.", target_entity->name.c_str()), target->pos);
 		}
 	}
 
@@ -135,7 +144,8 @@ namespace RYSIC::World
 		Pos dest = target->pos + target_pos;
 		if(world->get_map())
 		{
-			if(world->get_map()->blocking_entity_at(dest))
+			auto target_entity = world->get_map()->blocking_entity_at(dest);
+			if(target_entity != nullptr && target_entity != target)
 				MeleeAction(target_pos).perform(world, target);
 			else
 				MovementAction(target_pos).perform(world, target);

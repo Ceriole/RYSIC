@@ -21,11 +21,13 @@ namespace RYSIC::Log
 		unsigned int count = 0;
 
 		const std::string str() const;
-		const Color fg_color() const;
-		const Color bg_color() const;
+		const Color fg_color(const Color& base_fg = std::nullopt) const;
+		const Color bg_color(const Color& base_bg = std::nullopt) const;
 
 		bool operator==(const Message &lhs) const
 		{ return !msg.compare(lhs.msg) && type == lhs.type; }
+
+		unsigned long age() const;
 	};
 
 	class MessageFeed

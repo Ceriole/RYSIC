@@ -1,5 +1,8 @@
 #include "Log.hpp"
 
+#include "world/World.hpp"
+#include "Constants.hpp"
+
 namespace RYSIC::Log
 {
 
@@ -10,14 +13,14 @@ namespace RYSIC::Log
 		return msg + (count > 0 ? buf : "");
 	}
 
-	const Color Message::fg_color() const
+	const Color Message::fg_color(const Color& base_fg) const
 	{
 		Color fg = std::nullopt;
 		switch (type)
 		{
 		default:
 		case MessageType::NORMAL:
-			fg = std::nullopt;	break;
+			fg = base_fg;	break;
 		case MessageType::GOOD:
 			fg = {{20, 20, 170}};	break;
 		case MessageType::BAD:
@@ -30,10 +33,14 @@ namespace RYSIC::Log
 			fg = {{0, 150, 70}};	break;
 		}
 
+		if(age() >= Constants::MESSAGE_AGE_STALE)
+			if(fg.has_value())
+				fg = TCOD_color_lerp(fg.value(), {}, 0.5f);
+
 		return fg;
 	}
 
-	const Color Message::bg_color() const
+	const Color Message::bg_color(const Color& base_bg) const
 	{
 		Color bg = std::nullopt;
 		switch (type)
@@ -42,7 +49,7 @@ namespace RYSIC::Log
 		case MessageType::NORMAL:
 		case MessageType::GOOD:
 		case MessageType::BAD:
-			bg = std::nullopt;	break;
+			bg = base_bg;	break;
 		case MessageType::GREAT:
 			bg = {{5, 50, 0}};	break;
 		case MessageType::TERRIBLE:
@@ -51,7 +58,19 @@ namespace RYSIC::Log
 			bg = {{0, 75, 50}};	break;
 		}
 
+		if(age() >= Constants::MESSAGE_AGE_STALE)
+			if(bg.has_value())
+				bg = TCOD_color_lerp(bg.value(), base_bg.value_or(TCOD_ColorRGB{}), 0.5f);
+
 		return bg;
+	}
+
+	unsigned long Message::age() const
+	{
+		if(World::s_world_instance)
+			return World::s_world_instance->get_time() - timestamp;
+		else
+			return timestamp;
 	}
 
 	void MessageFeed::message(const Message &msg)
