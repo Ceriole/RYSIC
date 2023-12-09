@@ -14,15 +14,6 @@ namespace RYSIC::Interface
 		return {rect.x, rect.y};
 	}
 
-	tcod::Console CreateComponentCanvas(
-		const unsigned int w, const unsigned int h, const std::optional<TCOD_ColorRGB> fg,
-		const std::optional<TCOD_ColorRGB> bg)
-	{
-		tcod::Console subconsole = tcod::Console{(int) w, (int) h};
-		Util::Screen::fill(subconsole, 0, fg, bg);
-		return subconsole;
-	}
-
 	void Container::render(TCOD_Console &console)
 	{
 		if(!enabled)
@@ -30,7 +21,7 @@ namespace RYSIC::Interface
 		if(rect.w == 0 || rect.h == 0)
 			return;
 
-		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
 		for(auto comp = children.begin(); comp != children.end(); comp++)
 			if((*comp)->enabled)
 				(*comp)->render(subconsole);
@@ -98,7 +89,7 @@ namespace RYSIC::Interface
 		if(rect.w == 0 || rect.h == 0)									// if width or height is 0 then skip drawing
 			return;
 		
-		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
 
 		Rect temp_rect = rect;											// save position, width and height
 
@@ -166,7 +157,7 @@ namespace RYSIC::Interface
 			return;
 		if(rect.w == 0 || rect.h == 0)
 			return;
-		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
 
 		Frame::render(subconsole);								// render frame
 		if(drawTopbar)
@@ -275,7 +266,7 @@ namespace RYSIC::Interface
 		case HOVERED: button_color = color_hover; break;
 		case PRESSED: button_color = color_pressed; break;
 		}
-		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, label_color, button_color);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, label_color, button_color);
 
 		if(!label.empty())
 		{
@@ -334,7 +325,7 @@ namespace RYSIC::Interface
 			return;
 		if(rect.w == 0 || rect.h == 0)
 			return;
-		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, fg, bg);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
 		tcod::blit(subconsole, canvas);
 		for(auto comp = children.begin(); comp != children.end(); comp++)
 			if((*comp)->enabled)
@@ -400,7 +391,7 @@ namespace RYSIC::Interface
 		if(!enabled)
 			return;
 		
-		tcod::Console subconsole = CreateComponentCanvas(rect.w, rect.h, std::nullopt, bg);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, std::nullopt, bg);
 
 		switch (direction)
 		{
@@ -414,5 +405,38 @@ namespace RYSIC::Interface
 		tcod::print_rect(subconsole, {0, 0, 0, 0}, text, label_color, std::nullopt, alignmentToTCOD(align));
 
 		tcod::blit(console, subconsole, {rect.x, rect.y});				// blit canvas to console
+	}
+
+	void LogContainer::render(TCOD_Console &console)
+	{
+		if(!enabled)
+			return;
+
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
+
+		if(m_log)
+		{
+		tcod::Console message_box = Util::Screen::CreateComponentCanvas(rect.w, rect.h - 1, fg, bg);
+			int y = rect.h - 1;
+			for(auto msg = m_log->end(); msg != m_log->begin();)
+			{
+				--msg;
+				y -= tcod::get_height_rect(rect.w, msg->str());
+				tcod::print_rect(message_box, {0, y, rect.w, 0}, msg->str(), msg->fg_color(),  msg->bg_color());
+				if(y < 1)
+					break;
+			}
+			tcod::blit(subconsole, message_box, {0, 1});
+		}
+		else
+		{
+			tcod::print_rect(subconsole, {0, rect.h / 2, rect.w, 0}, "Null.", std::nullopt, std::nullopt, TCOD_CENTER);
+		}
+		
+
+		Util::Screen::draw_hline(subconsole, 0, 0, 0, 0x2550, std::nullopt, std::nullopt);
+		tcod::print_rect(subconsole, {0, 0, rect.w, 1}, "\u2561MESSAGE LOG\u255e", std::nullopt, std::nullopt, TCOD_CENTER);
+
+		tcod::blit(console, subconsole, {rect.x, rect.y});
 	}
 }

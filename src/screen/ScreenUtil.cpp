@@ -6,6 +6,14 @@
 
 namespace RYSIC::Util::Screen
 {
+	tcod::Console CreateComponentCanvas(
+		const unsigned int w, const unsigned int h, const std::optional<TCOD_ColorRGB> fg,
+		const std::optional<TCOD_ColorRGB> bg)
+	{
+		tcod::Console subconsole = tcod::Console{(int) w, (int) h};
+		Util::Screen::fill(subconsole, 0, fg, bg);
+		return subconsole;
+	}
 
 	void set_char(TCOD_Console &console, int x, int y, int ch, std::optional<TCOD_ColorRGB> fg, std::optional<TCOD_ColorRGB> bg)
 	{

@@ -35,6 +35,8 @@ namespace RYSIC
 		void set_title(const std::string &title);
 		void regenerate_map();
 
+		void populate_window();
+
 		static SDL_HitTestResult HitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
 	};
 }

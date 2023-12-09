@@ -29,33 +29,6 @@ namespace RYSIC
 			m_context = tcod::Context(params);
 			m_mouse = {0, 0};
 			m_quit = false;
-
-			m_window = CreateRef<Interface::Window>(Rect{0, 0, m_width, m_height}, C_GRAY4, C_GRAY3, C_GRAY3, C_GRAY4);
-			auto btn_fullscreen = CreateRef<Interface::Button>(Rect{m_width - 9, 0, 3, 1}, "\u25b2", C_BLACK, C_GRAY2, C_GRAY3, C_GRAY0, [&](int, int, Interface::Button* const btn) {
-				set_fullscreen(!m_fullscreen);
-				if(m_fullscreen)
-					btn->label = "\u25bc";
-				else
-					btn->label = "\u25b2";
-			});
-			auto close_button = CreateRef<Interface::Button>(Rect{m_width - 5, 0, 3, 1}, "X", C_WHITE, C_RED, [&](int, int, Interface::Button* const) { quit(); });
-			m_canvas = CreateRef<Interface::Canvas>(Rect{0, 0, m_window->rect.w, m_window->rect.h - 1}, C_WHITE, C_BLACK);
-			m_window->decoration = Interface::Frame::FrameDecoration::HEADER;
-			m_window->add(m_canvas);
-			m_window->add_widget(close_button);
-			m_window->add_widget(btn_fullscreen);
-			TCODConsole::setColorControl(TCOD_COLCTRL_1, {0, 255, 255}, {0, 127, 127});
-			m_window->add_widget(CreateRef<Interface::Label>(Pos{0, m_window->rect.h - 3},
-				tcod::stringf("Use %c[wasd]%c, %c[hjkl]%c or %c[numpad]%c to move.\nPress %c[r]%c to reveal map. Press %c[f]%c to forget.\nPress %c[space]%c to generate a new map. Press %c[esc]%c to exit.",
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP,
-					TCOD_COLCTRL_1, TCOD_COLCTRL_STOP
-					),
-				C_WHITE, std::nullopt));
 			
 			SDL_SetWindowHitTest(m_context.get_sdl_window(), Game::HitTestCallback, this);
 
@@ -63,6 +36,8 @@ namespace RYSIC
 
 			srand(time(NULL) % 1000);
 			regenerate_map();
+
+			populate_window();
 
 			set_title("RYSIC");
 			set_fullscreen(false);
@@ -89,8 +64,7 @@ namespace RYSIC
 			handle_events();
 			m_canvas->clear();
 
-			Util::Screen::fill(m_canvas->canvas, '.', C_GRAY0, C_BLACK);
-			m_world->render(m_canvas->canvas);
+			m_world->render(m_canvas->canvas, m_canvas->rect.w, m_canvas->rect.h);
 
 			m_window->render(m_console);
 			m_context.present(m_console); // update console to screen
@@ -129,7 +103,7 @@ namespace RYSIC
 				continue;
 			
 			if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
-				regenerate_map();
+			{ regenerate_map(); continue; }
 			
 			auto action = World::GetActionFromEvent(event, m_world);
 			if(action)
@@ -154,6 +128,34 @@ namespace RYSIC
 		Pos temp;
 		World::Map* new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, 2, &temp);
 		m_world->set_map(new_map, temp);
+	}
+
+	void Game::populate_window()
+	{
+		m_window = CreateRef<Interface::Window>(Rect{0, 0, m_width, m_height}, C_GRAY4, C_GRAY3, C_GRAY3, C_GRAY4);
+		m_window->decoration = Interface::Frame::FrameDecoration::HEADER;
+
+		auto btn_fullscreen = CreateRef<Interface::Button>(Rect{m_width - 9, 0, 3, 1}, "\u25b2", C_BLACK, C_GRAY2, C_GRAY3, C_GRAY0, [&](int, int, Interface::Button* const btn) {
+			set_fullscreen(!m_fullscreen);
+			if(m_fullscreen)
+				btn->label = "\u25bc";
+			else
+				btn->label = "\u25b2";
+		});
+		m_window->add_widget(btn_fullscreen);
+
+		auto close_button = CreateRef<Interface::Button>(Rect{m_width - 5, 0, 3, 1}, "X", C_WHITE, C_RED, [&](int, int, Interface::Button* const) { quit(); });
+		m_window->add_widget(close_button);
+
+		m_canvas = CreateRef<Interface::Canvas>(Rect{0, 0, m_window->rect.w, ((m_window->rect.h * 3) / 4)}, C_WHITE, C_BLACK);
+		m_window->add(m_canvas);
+		
+		auto message_log = CreateRef<Interface::LogContainer>(Rect{0, (m_window->rect.h * 3) / 4, m_window->rect.w, (m_window->rect.h * 1) / 4}, m_world->log());
+		m_window->add(message_log);
+
+		m_world->message(
+			"Use [wasd], [hjkl] or [numpad] to move.\nPress [r] to reveal map. Press [f] to forget.\nPress [space] to generate a new map. Press [esc] to exit.",
+				Log::MessageType::SYSTEM);
 	}
 
 	SDL_HitTestResult Game::HitTestCallback(SDL_Window*, const SDL_Point *area, void *data)

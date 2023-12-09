@@ -7,6 +7,7 @@
 #include "Pointers.hpp"
 #include "Types.hpp"
 #include "Colors.hpp"
+#include "Log.hpp"
 
 namespace RYSIC::Interface
 {
@@ -234,5 +235,21 @@ namespace RYSIC::Interface
 
 		void set(float _value) { value = CLAMP(_value, 0.0f, 1.0f); };
 		const float get() const { return value; };
+	};
+
+	class LogContainer : public Component
+	{
+	public:
+		Color fg, bg;
+	private:
+		Log::MessageFeed* m_log;
+
+	public:
+		LogContainer() = default;
+		LogContainer(const Rect& _rect, Log::MessageFeed* log)
+			: Component(_rect), m_log(log)
+		{}
+
+		virtual void render(TCOD_Console &console) override;
 	};
 }

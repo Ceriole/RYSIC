@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "Types.hpp"
+
 namespace RYSIC::Log
 {
 
@@ -18,6 +20,10 @@ namespace RYSIC::Log
 		unsigned long timestamp;
 		unsigned int count = 0;
 
+		const std::string str() const;
+		const Color fg_color() const;
+		const Color bg_color() const;
+
 		bool operator==(const Message &lhs) const
 		{ return !msg.compare(lhs.msg) && type == lhs.type; }
 	};
@@ -25,9 +31,25 @@ namespace RYSIC::Log
 	class MessageFeed
 	{
 	private:
+		std::vector<Message> m_complete_log;
 		std::vector<Message> m_log;
 	public:
 		void message(const Message &msg);
+		void clear();
+		void nuke();
+
+		size_t count() const { return m_log.size(); };
+		size_t total_count() const { return m_complete_log.size(); };
+
+		auto begin()
+		{ return m_log.begin(); }
+		auto end()
+		{ return m_log.end(); }
+
+		auto rbegin()
+		{ return m_log.rend(); }
+		auto rend()
+		{ return m_log.rbegin(); }
 	};
 
 }

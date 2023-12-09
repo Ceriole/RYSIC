@@ -78,8 +78,9 @@ namespace RYSIC::World
 		return nullptr;
 	}
 
-	void Map::render(TCOD_Console &console) const
+	void Map::render(TCOD_Console &console, const Pos& focus, unsigned int win_w, unsigned int win_h) const
 	{
+		tcod::Console map_console = Util::Screen::CreateComponentCanvas(m_width, m_height, std::nullopt, std::nullopt);
 		for(int x = 0; x < (int) m_width; x++)
 			for(int y = 0; y < (int) m_height; y++)
 			{
@@ -92,11 +93,14 @@ namespace RYSIC::World
 					gfx = tile->gfx.dark(Constants::UNEXPLORED_DARK_FACTOR);
 				else
 					gfx = GLYPH_UNSEEN;
-				Util::Screen::set_char(console, x, y, gfx);
+				Util::Screen::set_char(map_console, x, y, gfx);
 			}
 		for(auto ent : m_entities)
 			if(attrib_at(ent->pos)->visible)
-				ent->render(console);
+				ent->render(map_console);
+		
+		Pos map_offset_pos = focus - Pos{(int) win_w / 2, (int) win_h / 2};
+		tcod::blit(console, map_console, {0, 0}, {map_offset_pos.x, map_offset_pos.y, (int) win_w, (int) win_h});
 	}
 
 	void Map::update_fov(Entity* viewer)

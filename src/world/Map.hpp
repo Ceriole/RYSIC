@@ -52,7 +52,7 @@ namespace RYSIC::World
 		std::set<Entity*> entities_at(const Pos& xy) const;
 		Entity* Map::blocking_entity_at(const Pos& xy) const; 
 
-		void render(TCOD_Console &console) const;
+		void render(TCOD_Console &console, const Pos& focus = {0, 0}, unsigned int win_w = 0, unsigned int win_h = 0) const;
 
 		unsigned int width() const { return m_width; }
 		unsigned int height() const { return m_height; }

@@ -48,11 +48,11 @@ namespace RYSIC::World
 		}
 	}
 
-	void World::render(TCOD_Console &console) const
+	void World::render(TCOD_Console &console, unsigned int win_w, unsigned int win_h) const
 	{
 		if(!m_current_map)
 			return;
-		m_current_map->render(console);
+		m_current_map->render(console, m_player->pos, win_w, win_h);
 	}
 
 	void World::handle_action(Action *action)

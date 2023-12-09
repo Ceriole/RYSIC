@@ -109,7 +109,7 @@ namespace RYSIC::World
 			auto target_entity = world->get_map()->blocking_entity_at(dest);
 			if(!target_entity)
 				return;
-			printf("You bump against %s, with little effect.\n", target_entity->name.c_str());
+			world->announce(tcod::stringf("You bump against %s, with little effect.", target_entity->name.c_str()), target->pos);
 		}
 	}
 

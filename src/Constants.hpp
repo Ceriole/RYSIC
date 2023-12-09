@@ -45,5 +45,7 @@ namespace RYSIC::Constants
 	constexpr const char* WORLD_TIME_FORMAT = "Year %3u, Day %3u %2u:%2u:%2u";
 
 	// MESSAGES
-	constexpr const char* MSG_NO_ACTION_FOR_KEY = "Unknown action '%s'";
+	constexpr const char* MSG_NO_ACTION_FOR_KEY = "Unbound key '%s'";
+	constexpr unsigned long MESSAGE_AGE_STALE = WORLD_TICS_SECOND * 10;
+	constexpr unsigned long MESSAGE_AGE_OLD = WORLD_TICS_SECOND * 50;
 }
