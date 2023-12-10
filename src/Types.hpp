@@ -74,6 +74,8 @@ namespace RYSIC
 
 		double distance(const Pos& b) const
 		{ return sqrt(pow(b.x - x, 2) + pow(b.y - y, 2)); }
+		int chebyshev(const Pos& b) const
+		{ return MAX(abs(b.x - x), abs(b.y - y)); }
 	};
 
 	struct Rect

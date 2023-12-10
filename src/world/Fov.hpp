@@ -6,7 +6,7 @@
 
 // a lot of this is based upon https://www.albertford.com/shadowcasting/
 // https://github.com/370417/symmetric-shadowcasting/
-// https://github.com/370417/symmetric-shadowcasting/blob/master/LICENSE.txt
+// Licence: https://github.com/370417/symmetric-shadowcasting/blob/master/LICENSE.txt
 
 namespace RYSIC::World::FOV
 {

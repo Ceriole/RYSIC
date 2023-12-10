@@ -3,7 +3,9 @@
 #include "Types.hpp"
 #include "screen/LineUtil.hpp"
 #include "Constants.hpp"
-#include "StaticEntities.hpp"
+#include "world/Map.hpp"
+#include "world/entity/Actor.hpp"
+#include "entity/StaticEntities.hpp"
 
 namespace RYSIC::World::MapGenerator
 {
@@ -58,9 +60,9 @@ namespace RYSIC::World::MapGenerator
 			if(!map->entities_at(pos).size())
 			{
 				if((rand() % 10) < 8)	// 80%
-					EntityDefintions::KOBOLD.spawn(map, pos);
+					CreateActor(ActorDefintion::KOBOLD)->place(map, pos);
 				else					// 20%
-					EntityDefintions::IMP.spawn(map, pos);
+					CreateActor(ActorDefintion::IMP)->place(map, pos);
 				monster_cnt--;
 			}
 		}
@@ -68,9 +70,9 @@ namespace RYSIC::World::MapGenerator
 
 	Map* GenerateDungeon(unsigned int width, unsigned int height, unsigned int max_rooms,
 		unsigned int room_min_size, unsigned int room_max_size, unsigned int max_monsters_per_room,
-		Pos* player_pos)
+		World* world)
 	{
-		Map* map = new Map(width, height, TILE_WALL);	// create map object
+		Map* map = new Map(world, width, height, TILE_WALL);	// create map object
 
 		std::vector<Rect> rooms;						// room array
 		unsigned int r = 0, t = 0; 						// room count, tries counter
@@ -99,7 +101,7 @@ namespace RYSIC::World::MapGenerator
 			carve(map, room.inner(), TILE_FLOOR);		// set map tiles where room is to TILE_FLOOR
 
 			if(r == 0)									// if this is the first room, put the player there
-				(*player_pos) = room.center();
+				world->player()->place(map, room.center());
 			else if(r == max_rooms - 1)					// otherwise, if this is the last room,
 														// make a tunnel to the first room
 				carve_tunnel(map, rooms.front().center(), room.center(), TILE_FLOOR);

@@ -220,20 +220,27 @@ namespace RYSIC::Interface
 
 	class ProgressBar : public Label
 	{
+	public:
+		enum Direction { HORIZONTAL, VERTICAL };
 	private:
 		float value = 0.5f;
 		Color label_color;
-		enum Direction { HORIZONTAL, VERTICAL } direction = HORIZONTAL;
+		Direction direction;
 
 	public:
 		ProgressBar() = default;
-		ProgressBar(const Pos &_pos, const std::string &_text, Color _label_color, Color _fg, Color _bg)
-			: Label(_pos, _text, _fg, _bg), label_color(_label_color)
-		{}
+		ProgressBar(const Pos &_pos, unsigned int length, const std::string &_text, Color _label_color, Color _fg, Color _bg, Direction dir = HORIZONTAL)
+			: Label(_pos, _text, _fg, _bg), label_color(_label_color), direction(dir)
+		{
+			if(direction == HORIZONTAL)
+				rect.h = 1, rect.w = length;
+			else
+				rect.h = length, rect.w = 1;
+		}
 
 		virtual void render(TCOD_Console &console) override;
 
-		void set(float _value) { value = CLAMP(_value, 0.0f, 1.0f); };
+		void set(float _value) { value = CLAMP(0.0f, 1.0f, _value); };
 		const float get() const { return value; };
 	};
 

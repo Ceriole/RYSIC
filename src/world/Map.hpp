@@ -2,17 +2,19 @@
 
 #include <set>
 
-#include "Entity.hpp"
-#include "Actions.hpp"
-#include "Pointers.hpp"
+#include "Types.hpp"
 
 namespace RYSIC::World
 {
-	
+	class World;
+	class Entity;
+	class Actor;
+
 	struct Tile
 	{
 		bool walkable, transparent;
 		Glyph gfx;
+		float walk_cost = 1.0f;
 
 		bool operator==(const Tile& rhs) const
 		{ return memcmp(this, &rhs, sizeof(Tile)); }
@@ -30,27 +32,33 @@ namespace RYSIC::World
 	constexpr Tile TILE_WALL =
 		{false, false, {0x3003, C_GRAY4, C_BLACK}};
 	constexpr Tile TILE_FLOOR =
-		{true, true, {0x3000, {{20, 120, 20}}, {{0, 20, 0}}}};
+		{true, true, {0x3000, {{20, 120, 20}}, {{0, 20, 0}}}, 1.0f};
 
 	class Map
 	{
 	private:
+		World* m_world;
 		unsigned int m_width = 0, m_height = 0;
 		Tile* m_tiles = nullptr;
 		TileAttributes* m_tile_attributes = nullptr;
 		std::set<Entity*> m_entities;
 
 	public:
-		Map(unsigned int width, unsigned int height, const Tile& fill_tile = TILE_VOID);
+		Map(World* world, unsigned int width, unsigned int height, const Tile& fill_tile = TILE_VOID);
 		~Map();
 
 		Tile* at(const Pos& xy) const;
 		TileAttributes* attrib_at(const Pos& xy) const;
 		Map* add(Entity* entity);
 		Map* remove(Entity* entity);
+		bool has_entity(Entity* entity) const { return m_entities.find(entity) != m_entities.end(); };
 		bool in_bounds(const Pos& xy) const;
 		std::set<Entity*> entities_at(const Pos& xy) const;
 		Entity* Map::blocking_entity_at(const Pos& xy) const; 
+		Actor* Map::actor_at(const Pos& xy) const; 
+		const std::set<Entity*> entities() const { return m_entities; }
+
+		World* world() const { return m_world; }
 
 		void render(TCOD_Console &console, const Pos& focus = {0, 0}, unsigned int win_w = 0, unsigned int win_h = 0) const;
 
@@ -68,6 +76,8 @@ namespace RYSIC::World
 		bool remember(const Pos& xy);
 		bool forget(const Pos& xy);
 
+		float get_movement_cost(const Pos &from, const Pos &to) const;
+
 		bool can_see(const Pos& origin, const Pos& target, double max_distance = 0) const;
 
 		bool blocks_sight(const Pos& xy) const;
@@ -77,7 +87,7 @@ namespace RYSIC::World
 		Tile& operator[](int index)
 		{
 			if(index >= (int)(m_width * m_height))
-				throw std::runtime_error("Index out of array bounds");
+				throw std::runtime_error("Index out of map bounds");
 			return m_tiles[index];
 		};
 	};

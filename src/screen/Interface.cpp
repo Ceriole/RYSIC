@@ -5,6 +5,8 @@
 #include "Util.hpp"
 #include "Constants.hpp"
 
+#include "world/entity/Actor.hpp"
+
 namespace RYSIC::Interface
 {
 
@@ -438,6 +440,13 @@ namespace RYSIC::Interface
 		
 
 		Util::Screen::draw_hline(subconsole, 0, 0, 0, 0x2550, std::nullopt, std::nullopt);
+		const Pos& player_pos = Game::Instance()->world()->player()->pos;
+		tcod::print_rect(subconsole, {1, 0, rect.w, 1},
+			tcod::stringf("\u2561POS: %d, %d\u255e", player_pos.x, player_pos.y),
+			std::nullopt, std::nullopt, TCOD_LEFT);
+		tcod::print_rect(subconsole, {0, 0, rect.w - 1, 1},
+			tcod::stringf("\u2561TIME: %s\u255e", Game::Instance()->world()->short_time_string().c_str()),
+			std::nullopt, std::nullopt, TCOD_RIGHT);
 		tcod::print_rect(subconsole, {0, 0, rect.w, 1}, "\u2561MESSAGE LOG\u255e", std::nullopt, std::nullopt, TCOD_CENTER);
 
 		tcod::blit(console, subconsole, {rect.x, rect.y});

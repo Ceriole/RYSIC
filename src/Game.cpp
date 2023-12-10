@@ -4,16 +4,19 @@
 
 #include "Constants.hpp"
 #include "screen/ScreenUtil.hpp"
-#include "world/Map.hpp"
 #include "world/MapGenerator.hpp"
-#include "world/StaticEntities.hpp"
+#include "world/entity/StaticEntities.hpp"
+#include "world/entity/Actor.hpp"
 
 namespace RYSIC
 {
 
+	Game* Game::s_instance = nullptr;
+
 	Game::Game(TCOD_ContextParams params, int width, int height)
 		: m_width(width), m_height(height)
 	{
+		s_instance = this;
 		try
 		{
 			m_tileset = tcod::load_tilesheet(Constants::DEFAULT_TILESET_FILE, Constants::TILESET_COLUMNS_ROWS, Constants::CHARMAP);
@@ -32,7 +35,8 @@ namespace RYSIC
 			
 			SDL_SetWindowHitTest(m_context.get_sdl_window(), Game::HitTestCallback, this);
 
-			m_world = new World::World(new World::Entity(World::EntityDefintions::PLAYER));
+			m_world = new World::World(World::CreateActor(World::ActorDefintion::PLAYER));
+			set_event_handler(new GameplayEventHandler(this, m_world));
 
 			srand(time(NULL) % 1000);
 			regenerate_map();
@@ -55,6 +59,8 @@ namespace RYSIC
 		m_window->remove_all_widgets();
 		m_console.release();
 		m_context.close();
+
+		s_instance = nullptr;
 	}
 
 	int Game::run()
@@ -66,6 +72,7 @@ namespace RYSIC
 
 			m_world->render(m_canvas->canvas, m_canvas->rect.w, m_canvas->rect.h);
 
+			m_hp_bar->set(m_world->player()->stats.hp_ratio());
 			m_window->render(m_console);
 			m_context.present(m_console); // update console to screen
 			TCOD_console_clear(m_console.get()); // Clear console
@@ -105,15 +112,8 @@ namespace RYSIC
 			if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
 			{ regenerate_map(); continue; }
 			
-			auto action = World::GetActionFromEvent(event, m_world);
-			if(action)
-				switch(action->type())
-				{
-				case World::Action::Type::EXIT:
-					quit(); break;
-				default:
-					m_world->handle_action(action); break;
-				}
+			if(m_event_handler)
+				m_event_handler->handle(event);
 		}
 	}
 
@@ -126,8 +126,8 @@ namespace RYSIC
 	void Game::regenerate_map()
 	{
 		Pos temp;
-		World::Map* new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, 2, &temp);
-		m_world->set_map(new_map, temp);
+		World::Map* new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, 2, m_world);
+		m_world->set_map(new_map);
 	}
 
 	void Game::populate_window()
@@ -146,6 +146,9 @@ namespace RYSIC
 
 		auto close_button = CreateRef<Interface::Button>(Rect{m_width - 5, 0, 3, 1}, "X", C_WHITE, C_RED, [&](int, int, Interface::Button* const) { quit(); });
 		m_window->add_widget(close_button);
+		m_hp_bar = CreateRef<Interface::ProgressBar>(Pos{0, 2}, 15, "HP", C_WHITE, C_RED, TCOD_ColorRGB{40, 20, 20}, Interface::ProgressBar::Direction::VERTICAL);
+		m_hp_bar->set(m_world->player()->stats.hp_ratio());
+		m_window->add_widget(m_hp_bar);
 
 		m_canvas = CreateRef<Interface::Canvas>(Rect{0, 0, m_window->rect.w, ((m_window->rect.h * 3) / 4)}, C_WHITE, C_BLACK);
 		m_window->add(m_canvas);

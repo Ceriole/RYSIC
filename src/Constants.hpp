@@ -42,11 +42,27 @@ namespace RYSIC::Constants
 	// WORLD
 	constexpr unsigned long WORLD_TICS_SECOND = 100; // how long a 'world time' second is in world tics 
 	constexpr size_t WORLD_TIME_STRLEN = 26;
-	constexpr const char* WORLD_TIME_FORMAT = "Year %3u, Day %3u %2u:%2u:%2u";
+	constexpr const char* WORLD_SHORT_TIME_FORMAT = "%u:%u:%u";
+	constexpr const char* WORLD_TIME_FORMAT = "Year %u, Day %u %u:%u:%u";
 	constexpr unsigned long WAIT_LENGTH = WORLD_TICS_SECOND * 5;
 
 	// MESSAGES
-	constexpr const char* MSG_NO_ACTION_FOR_KEY = "Unbound key '%s'";
 	constexpr unsigned long MESSAGE_AGE_STALE = WORLD_TICS_SECOND * 10;
 	constexpr unsigned long MESSAGE_AGE_OLD = WORLD_TICS_SECOND * 50;
+	constexpr const char* MSG_NO_ACTION_FOR_KEY = "Unbound key '%s'";
+	constexpr const char* MSG_WAIT = "You wait a moment.";
+	constexpr const char* MSG_PLAYER_DEATH = "You fall...";
+	constexpr const char* MSG_DEATH = "%s dies!";
+
+	// STATS
+	constexpr int STAT_BASE_VALUE = 5;
+	constexpr int STAT_BASE_VISION_RADIUS = 8;
+	constexpr int STAT_BASE_HEALTH = 10;
+	constexpr int STAT_BASE_MELEE = 3;
+	constexpr int STAT_BASE_PSYCHIC = 2;
+	constexpr int STAT_BASE_MELEE_DEF = 2;
+	constexpr int STAT_BASE_PSYCHIC_DEF = 2;
+	constexpr int STAT_BASE_SEDUCTION = 10;
+	constexpr int STAT_BASE_MOVE_SPEED = WORLD_TICS_SECOND * 5;
+	constexpr int STAT_MIN_MOVE_SPEED = WORLD_TICS_SECOND / 2;
 }

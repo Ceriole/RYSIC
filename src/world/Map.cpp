@@ -2,16 +2,18 @@
 
 #include <queue>
 
+#include "World.hpp"
 #include "Actions.hpp"
 #include "screen/ScreenUtil.hpp"
 #include "Fov.hpp"
 #include "Constants.hpp"
+#include "entity/Actor.hpp"
 
 namespace RYSIC::World
 {
 	
-	Map::Map( unsigned int width, unsigned int height, const Tile& fill_tile)
-		: m_width(width), m_height(height)
+	Map::Map(World* world, unsigned int width, unsigned int height, const Tile& fill_tile)
+		: m_world(world), m_width(width), m_height(height)
 	{
 		const int tile_cnt = m_width * m_height;
 
@@ -46,13 +48,15 @@ namespace RYSIC::World
 	
 	Map *Map::add(Entity* entity)
 	{
-		m_entities.insert(entity);
+		if(!has_entity(entity))
+			m_entities.insert(entity);
 		return this;
 	}
 
 	Map *Map::remove(Entity *entity)
 	{
-		m_entities.erase(entity);
+		if(has_entity(entity))
+			m_entities.erase(entity);
 		return this;
 	}
 
@@ -78,6 +82,22 @@ namespace RYSIC::World
 		return nullptr;
 	}
 
+	Actor *Map::actor_at(const Pos &xy) const
+	{
+		for(auto ent : entities_at(xy))
+			if(dynamic_cast<Actor*>(ent) && ent->thinks())
+				return (Actor*) ent;
+		return nullptr;
+	}
+
+	struct render_order_sorter
+	{
+		inline bool operator() (const Entity* a, const Entity* b)
+		{
+			return a->render_order < b->render_order;
+		}
+	};
+
 	void Map::render(TCOD_Console &console, const Pos& focus, unsigned int win_w, unsigned int win_h) const
 	{
 		tcod::Console map_console = Util::Screen::CreateComponentCanvas(m_width, m_height, std::nullopt, std::nullopt);
@@ -95,7 +115,9 @@ namespace RYSIC::World
 					gfx = GLYPH_UNSEEN;
 				Util::Screen::set_char(map_console, x, y, gfx);
 			}
-		for(auto ent : m_entities)
+		std::vector<Entity*> render_ordered_entities(m_entities.begin(), m_entities.end());
+		std::sort(render_ordered_entities.begin(), render_ordered_entities.end(), render_order_sorter());
+		for(auto ent : render_ordered_entities)
 			if(attrib_at(ent->pos)->visible)
 				ent->render(map_console);
 		
@@ -107,12 +129,18 @@ namespace RYSIC::World
 	{
 		if(viewer == nullptr)
 			return;
+		if(!has_entity(viewer))
+			return;
 
 		blind(); // clear visible tiles
 
-		auto _blocks = [&](const Pos& xy)->bool { return blocks_sight(xy); };
-		auto _reveal = [&](const Pos& xy)->void { reveal(xy); };
-		FOV::compute(viewer->pos, _blocks, _reveal, viewer->get_vision_radius());
+		Actor* actor = dynamic_cast<Actor*>(viewer);
+		if(actor)
+		{
+			auto _blocks = [&](const Pos& xy)->bool { return blocks_sight(xy); };
+			auto _reveal = [&](const Pos& xy)->void { reveal(xy); };
+			FOV::compute(viewer->pos, _blocks, _reveal, actor->stats.vision_radius());
+		}
 	}
 
 	void Map::nightmare_eyes(const Pos& origin)
@@ -229,8 +257,22 @@ namespace RYSIC::World
 		return true;
 	}
 
+	float Map::get_movement_cost(const Pos &from, const Pos &to) const
+	{
+		const Tile* origin_tile = at(from);
+		const Tile* dest_tile = at(to);
+		if(origin_tile && dest_tile)
+		{
+			if(!origin_tile->walkable || !dest_tile->walkable)
+				return 0.0f;
+			return (origin_tile->walk_cost + dest_tile->walk_cost);
+		}
+		return 0.0f;
+	}
+
 	void Map::progress(unsigned long tics)
 	{
-		// todo
+		for(auto ent : m_entities)
+			ent->progress(tics);
 	}
 }

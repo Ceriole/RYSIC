@@ -2,6 +2,7 @@
 
 #include "world/World.hpp"
 #include "Constants.hpp"
+#include "Game.hpp"
 
 namespace RYSIC::Log
 {
@@ -67,8 +68,8 @@ namespace RYSIC::Log
 
 	unsigned long Message::age() const
 	{
-		if(World::s_world_instance)
-			return World::s_world_instance->get_time() - timestamp;
+		if(Game::Instance()->world())
+			return Game::Instance()->world()->time() - timestamp;
 		else
 			return timestamp;
 	}

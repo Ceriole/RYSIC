@@ -4,49 +4,39 @@
 
 #include "Constants.hpp"
 #include "Map.hpp"
-
+#include "entity/Actor.hpp"
+#include "entity/AI.hpp"
 
 namespace RYSIC::World
 {
 
-	World* s_world_instance;
-
-	World::World(Entity *player)
-		: m_player(player)
-	{
-		s_world_instance = this;
-	}
-
 	World::~World()
 	{
-		set_map(nullptr, {0, 0});
+		set_map(nullptr);
 		delete m_player;
 	}
 
-	const char * World::get_time_string() const
+	const std::string World::short_time_string() const
 	{
-		unsigned int seconds = m_tics / Constants::WORLD_TICS_SECOND;
-		unsigned int minutes = seconds / 60;
-		unsigned int hours = minutes / 60;
-		unsigned int days = hours / 24;
-		unsigned int years = days / 365;
-		static char buf[Constants::WORLD_TIME_STRLEN];
-		sprintf_s(buf, Constants::WORLD_TIME_FORMAT, years % 999, days % 365, hours % 24, minutes % 60, seconds % 60);
-		return buf;
+		return Util::short_time_to_string(time());
 	}
 
-	void World::set_map(Map *map, const Pos &player_xy)
+	const std::string World::time_string() const
+	{
+		return Util::time_to_string(time());
+	}
+
+	void World::set_map(Map *map)
 	{
 		if(m_current_map)
 		{
 			m_current_map->remove(m_player);
 			delete m_current_map;
+			m_player->m_map = nullptr;
 		}
 		m_current_map = map;
 		if(m_current_map)
 		{
-			m_player->pos = player_xy;
-			m_current_map->add(m_player);
 			m_current_map->update_fov(m_player);
 		}
 	}
@@ -56,13 +46,6 @@ namespace RYSIC::World
 		if(!m_current_map)
 			return;
 		m_current_map->render(console, m_player->pos, win_w, win_h);
-	}
-
-	void World::handle_action(Action *action)
-	{
-		if(action == nullptr || m_current_map == nullptr)
-			return;
-		action->perform(this, m_player);
 	}
 
 	void World::progress(unsigned long tics)
