@@ -29,6 +29,7 @@ namespace RYSIC::World
 		const std::string short_time_string() const;
 		const std::string time_string() const;
 		void set_map(Map* map);
+		void set_player(Actor* player);
 		void render(TCOD_Console &console, unsigned int win_w = 0, unsigned int win_h = 0) const;
 		
 		void progress(unsigned long tics);

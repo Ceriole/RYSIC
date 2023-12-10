@@ -36,9 +36,19 @@ namespace RYSIC::World
 		}
 		m_current_map = map;
 		if(m_current_map)
-		{
 			m_current_map->update_fov(m_player);
-		}
+	}
+
+	void World::set_player(Actor *player)
+	{
+		if(!player)
+			return;
+		if(m_current_map)
+			m_current_map->remove(m_player);
+		Pos player_pos = m_player ? m_player->pos : player->pos;
+		m_player = player;
+		if(m_current_map)
+			m_player->place(m_current_map, player_pos);
 	}
 
 	void World::render(TCOD_Console &console, unsigned int win_w, unsigned int win_h) const

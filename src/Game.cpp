@@ -125,9 +125,11 @@ namespace RYSIC
 
 	void Game::regenerate_map()
 	{
-		Pos temp;
 		World::Map* new_map = World::MapGenerator::GenerateDungeon(Constants::DEFAULT_WIDTH, Constants::DEFAULT_HEIGHT - 1, 45, 6, 15, 2, m_world);
 		m_world->set_map(new_map);
+		m_world->set_player(World::CreateActor(World::ActorDefintion::PLAYER));
+		m_event_handler = new GameplayEventHandler(this, m_world);
+		m_world->log()->clear();
 	}
 
 	void Game::populate_window()

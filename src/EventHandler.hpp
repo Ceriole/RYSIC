@@ -19,6 +19,9 @@ namespace RYSIC
 		EventHandler(Game* game)
 			: m_game(game)
 		{}
+		~EventHandler()
+		{}
+		
 		
 		virtual void handle(SDL_Event &event);
 
