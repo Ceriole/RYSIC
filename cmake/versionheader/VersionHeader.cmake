@@ -1,0 +1,2 @@
+set(VERSION_HEADER ${CMAKE_CURRENT_BINARY_DIR}/Version.h)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/Version.h.in ${VERSION_HEADER} @ONLY)

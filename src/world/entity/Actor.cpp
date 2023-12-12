@@ -15,6 +15,7 @@ namespace RYSIC::World
 		{
 			death_message = Constants::MSG_PLAYER_DEATH, message_type = RYSIC::Log::TERRIBLE;
 			Game::Instance()->set_event_handler(new GameOverEventHandler(Game::Instance()));
+			map()->blind();
 		}
 		else
 			death_message = tcod::stringf(Constants::MSG_DEATH, name.c_str()), message_type = RYSIC::Log::GOOD;

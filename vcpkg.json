@@ -3,16 +3,17 @@
 	"name": "rysic",
 	"version-semver": "0.0.0",
 	"dependencies": [
-	  {
-		"name": "libtcod",
-		"default-features": true,
-		"features": [
-		  "png",
-		  "sdl",
-		  "unicode",
-		  "zlib"
-		]
-	  },
-	  "sdl2"
+		{
+			"name": "libtcod",
+			"default-features": true,
+			"features": [
+				"png",
+				"sdl",
+				"unicode",
+				"zlib"
+			]
+		},
+		"sdl2",
+		"fmt"
 	]
-  }
+}

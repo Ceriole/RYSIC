@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <fmt/format.h>
 
 #include "screen/Colors.hpp"
 
@@ -147,3 +148,25 @@ namespace RYSIC
 	};
 	
 }
+
+template<>
+struct fmt::formatter<RYSIC::Pos>
+{
+	template<typename ParseContext>
+	constexpr auto parse(ParseContext& ctx)
+	{ return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const RYSIC::Pos &p, FormatContext& ctx)
+	{ return fmt::format_to(ctx.out(), "{}, {}", p.x, p.y); }
+};
+
+template<>
+struct fmt::formatter<RYSIC::Rect>
+{
+	template<typename ParseContext>
+	constexpr auto parse(ParseContext& ctx)
+	{ return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const RYSIC::Rect &r, FormatContext& ctx)
+	{ return fmt::format_to(ctx.out(), "{}, {}, {}, {}", r.x, r.y, r.w, r.h); }
+};

@@ -1,6 +1,7 @@
 #include "Game.hpp"
 
 #include <iostream>
+#include <fmt/core.h>
 
 #include "Constants.hpp"
 #include "screen/ScreenUtil.hpp"
@@ -49,7 +50,7 @@ namespace RYSIC
 		}
 		catch(const std::exception& e)
 		{
-			std::cerr << e.what() << '\n';
+			fmt::print(stderr, "{}\n", e.what());
 		}
 	}
 
@@ -65,6 +66,7 @@ namespace RYSIC
 
 	int Game::run()
 	{
+		fmt::print("starting...\n");
 		while(!m_quit)
 		{
 			handle_events();
@@ -82,7 +84,7 @@ namespace RYSIC
 
 	void Game::quit(int code)
 	{
-		printf("Quitting...\n");
+		fmt::print("quitting{}...\n", code ? fmt::format(" with code {}", code) : "");
 		m_exitCode = code;
 		m_quit = true;
 	}
@@ -156,8 +158,8 @@ namespace RYSIC
 		m_window->add(m_canvas);
 		
 		auto message_log = CreateRef<Interface::LogContainer>(Rect{0, (m_window->rect.h * 3) / 4, m_window->rect.w, (m_window->rect.h * 1) / 4}, m_world->log());
-		message_log->fg = C_WHITE;
-		message_log->bg = C_GRAY1;
+		message_log->fg = C_GRAY3;
+		message_log->bg = C_GRAY0;
 		m_window->add(message_log);
 
 		m_world->message(

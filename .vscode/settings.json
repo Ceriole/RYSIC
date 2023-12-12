@@ -109,7 +109,10 @@
     "typeindex": "cpp",
     "queue": "cpp",
     "ranges": "cpp",
-    "span": "cpp"
+    "span": "cpp",
+    "bitset": "cpp",
+    "variant": "cpp",
+    "*.in": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "cSpell.diagnosticLevel": "Hint"

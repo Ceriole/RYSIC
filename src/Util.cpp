@@ -1,6 +1,9 @@
 #include "Util.hpp"
 
+#include <fmt/core.h>
+
 #include "Constants.hpp"
+
 
 namespace RYSIC::Util
 {

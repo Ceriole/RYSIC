@@ -104,7 +104,10 @@ namespace RYSIC::World::AI
 			return;
 		}
 		
-		start_action(new WaitAction(world(), m_actor, 10));
+		if(rand() % 10 < 2)
+			start_action(new MovementAction(world(), m_actor, {(rand() % 3) - 1, ((rand() % 3) - 1)}));
+		else
+			start_action(new WaitAction(world(), m_actor, 10));
 	}
 
 }
