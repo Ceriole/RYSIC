@@ -20,7 +20,7 @@ inline void print_libs()
 int main(int argc, char* argv[])
 {
 #ifdef RYSIC_DEBUG
-	fmt::print("RYSIC {}\n", RYSIC_VERSION);
+	fmt::print("RYSIC {}\n", RYSIC_VERSION_STR);
 	print_libs();
 #endif
 	auto params = TCOD_ContextParams{};

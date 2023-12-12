@@ -8,6 +8,7 @@
 #include "world/MapGenerator.hpp"
 #include "world/entity/StaticEntities.hpp"
 #include "world/entity/Actor.hpp"
+#include "Version.h"
 
 namespace RYSIC
 {
@@ -44,7 +45,11 @@ namespace RYSIC
 
 			populate_window();
 
+#ifdef RYSIC_DEBUG
+			set_title("RYSIC " RYSIC_VERSION_STR);
+#else
 			set_title("RYSIC");
+#endif
 			set_fullscreen(false);
 			SDL_ShowWindow(m_context.get_sdl_window());
 		}
