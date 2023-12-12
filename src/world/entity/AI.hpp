@@ -11,7 +11,6 @@ namespace RYSIC::World
 
 	namespace AI
 	{
-
 		class BaseAI : public Action, public BaseComponent
 		{
 		protected:
@@ -45,6 +44,9 @@ namespace RYSIC::World
 		{
 		private:
 			std::vector<Pos> m_path;
+			bool sees_player;
+			Pos last_seen_player_pos;
+
 		public:
 			HostileAI(Actor* actor)
 				: BaseAI(actor)

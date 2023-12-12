@@ -85,10 +85,15 @@ namespace RYSIC::World::AI
 
 	void HostileAI::perform()
 	{
+		bool has_seen_player = sees_player;
 		Entity* target = world()->player();
-		int d = m_actor->pos.chebyshev(target->pos);
-		if(map()->can_see(m_actor->pos, target->pos, m_actor->stats.vision_radius()))
+		sees_player = map()->can_see(m_actor->pos, target->pos, m_actor->stats.vision_radius());
+		if(sees_player)
 		{
+			if(!has_seen_player)
+				world()->announce(fmt::format("The {} points at you with malicious intent!", m_actor->name), m_actor->pos, Log::BAD);
+			last_seen_player_pos = target->pos;
+			int d = m_actor->pos.chebyshev(target->pos);
 			if(d <= 1)
 			{
 				start_action(new MeleeAction(world(), m_actor, target->pos - m_actor->pos), !is_action<MeleeAction>());
