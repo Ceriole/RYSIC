@@ -25,9 +25,8 @@ namespace RYSIC::World
 			return (new Actor(
 				nullptr, {},
 				{0x310B, {{230, 85, 50}}},
-				"Imp", 7, 8, 6
+				"Imp", 8, 6, 8
 				))->set_ai<AI::HostileAI>();
-				break;
 		}
 		return nullptr;
 	}
