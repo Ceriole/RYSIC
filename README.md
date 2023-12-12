@@ -7,7 +7,7 @@
 [![MIT License][license-shield]][license-url]
 
 <!-- PROJECT LOGO -->
-<br />
+<br/>
 <div align="center">
   <!-- TODO
   <a href="https://github.com/Ceriole/RYSIC">
