@@ -15,6 +15,8 @@ namespace RYSIC
 	{
 	protected:
 		Game* m_game;
+		bool m_shift, m_ctrl, m_alt;
+		
 	public:
 		EventHandler(Game* game)
 			: m_game(game)

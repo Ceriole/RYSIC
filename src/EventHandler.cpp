@@ -11,6 +11,37 @@ namespace RYSIC
 	
 	void EventHandler::handle(SDL_Event &event)
 	{
+		if(event.type == SDL_KEYDOWN)
+		{
+			switch(event.key.keysym.sym)
+			{
+			case SDLK_LSHIFT:
+			case SDLK_RSHIFT:
+				m_shift = true; return;
+			case SDLK_RCTRL:
+			case SDLK_LCTRL:
+				m_ctrl = true; return;
+			case SDLK_LALT:
+			case SDLK_RALT:
+				m_alt = true; return;
+			}
+		}
+		else if(event.type == SDL_KEYUP)
+		{
+			switch(event.key.keysym.sym)
+			{
+			case SDLK_LSHIFT:
+			case SDLK_RSHIFT:
+				m_shift = false; return;
+			case SDLK_RCTRL:
+			case SDLK_LCTRL:
+				m_ctrl = false; return;
+			case SDLK_LALT:
+			case SDLK_RALT:
+				m_alt = false; return;
+			}
+		}
+
 		Action* action = get_action_from_SDL_event(event);
 		if(!action)
 			return;
