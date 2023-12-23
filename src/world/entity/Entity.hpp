@@ -33,7 +33,8 @@ namespace RYSIC::World
 		void move(const Pos &d_pos);
 		inline void move(int dx, int dy) { move({dx, dy}); }
 
-		void render(TCOD_Console &console);
+		virtual void render(TCOD_Console &console) const;
+		virtual void debug_render(TCOD_Console &) const {};
 
 		Entity* spawn(Map* new_map, const Pos& xy) const;
 		bool place(Map* new_map, const Pos& xy);

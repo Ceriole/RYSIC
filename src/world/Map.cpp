@@ -2,6 +2,7 @@
 
 #include <queue>
 
+#include "Game.hpp"
 #include "World.hpp"
 #include "Actions.hpp"
 #include "screen/ScreenUtil.hpp"
@@ -120,6 +121,9 @@ namespace RYSIC::World
 		for(auto ent : render_ordered_entities)
 			if(attrib_at(ent->pos)->visible)
 				ent->render(map_console);
+		if(Game::Instance()->debug())
+			for(auto ent : render_ordered_entities)
+				ent->debug_render(map_console);
 		
 		Pos map_offset_pos = focus - Pos{(int) win_w / 2, (int) win_h / 2};
 		tcod::blit(console, map_console, {0, 0}, {map_offset_pos.x, map_offset_pos.y, (int) win_w, (int) win_h});

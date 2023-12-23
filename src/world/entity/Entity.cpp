@@ -19,7 +19,7 @@ namespace RYSIC::World
 		pos += d_pos;
 	}
 
-	void Entity::render(TCOD_Console &console)
+	void Entity::render(TCOD_Console &console) const
 	{
 		Util::Screen::set_char(console, pos.x, pos.y, gfx);
 	}

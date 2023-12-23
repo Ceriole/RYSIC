@@ -7,6 +7,13 @@
 
 namespace RYSIC::World
 {
+
+	void Actor::debug_render(TCOD_Console &console) const
+	{
+		if(ai)
+			ai->debug_render(console);
+	}
+
 	void Actor::die()
 	{
 		std::string death_message;

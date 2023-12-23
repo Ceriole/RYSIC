@@ -29,9 +29,11 @@ namespace RYSIC::World
 			bool is_action() { if(!action.current) return false; return dynamic_cast<ActionClass*>(action.current); }
 
 			virtual void perform() override {};
-			std::vector<Pos> get_path_to(const Pos& dest) const;
+			std::vector<Pos> get_path_to(const Pos &dest) const;
+
+			virtual void debug_render(TCOD_Console &console) const;
 		protected:
-			bool start_action(Action* new_action, bool priority = false);
+			bool start_action(Action* new_action);
 
 			const class PathCallback : public ITCODPathCallback
 			{
@@ -53,6 +55,8 @@ namespace RYSIC::World
 			{}
 			
 			virtual void perform() override;
+
+			virtual void debug_render(TCOD_Console& console) const override;
 		};
 
 	}

@@ -18,14 +18,15 @@ namespace RYSIC::World
 			: Entity(map, _pos, _gfx, _name, true, RenderOrder::ACTOR), stats(this, ten, sag, viv)
 		{}
 
-		void progress(unsigned long tics) override { if(thinks()) ai->progress(tics); };
+		virtual void debug_render(TCOD_Console &console) const override;
 
+		void progress(unsigned long tics) override { if(thinks()) ai->progress(tics); };
+		
 		template<class AI_class>
 		Actor* set_ai() { ai = new AI_class(this); return this; }
+		virtual bool thinks() const override { return ai; };
 
 		void die();
-
-		virtual bool thinks() const override { return ai; };
 	};
 
 }
