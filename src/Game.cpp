@@ -47,6 +47,7 @@ namespace RYSIC
 
 #ifdef RYSIC_DEBUG
 			set_title("RYSIC " RYSIC_VERSION_STR);
+			set_debug(true);
 #else
 			set_title("RYSIC");
 #endif
@@ -106,6 +107,13 @@ namespace RYSIC
 			SDL_SetWindowFullscreen(m_context.get_sdl_window(), 0);
 	}
 
+	void Game::set_debug(bool debug)
+	{
+		if(m_debug == debug)
+			return;
+		m_debug = debug;
+	}
+
 	void Game::handle_events()
 	{
 		SDL_Event event;
@@ -141,10 +149,10 @@ namespace RYSIC
 
 	void Game::populate_window()
 	{
-		m_window = CreateRef<Interface::Window>(Rect{0, 0, m_width, m_height}, C_GRAY4, C_GRAY3, C_GRAY3, C_GRAY4);
+		m_window = CreateRef<Interface::Window>(Rect{0, 0, m_width, m_height}, C_LIGHTEST_GRAY, C_LIGHT_GRAY, C_LIGHT_GRAY, C_LIGHTEST_GRAY);
 		m_window->decoration = Interface::Frame::FrameDecoration::HEADER;
 
-		auto btn_fullscreen = CreateRef<Interface::Button>(Rect{m_width - 9, 0, 3, 1}, "\u25b2", C_BLACK, C_GRAY2, C_GRAY3, C_GRAY0, [&](int, int, Interface::Button* const btn) {
+		auto btn_fullscreen = CreateRef<Interface::Button>(Rect{m_width - 9, 0, 3, 1}, "\u25b2", C_BLACK, C_GRAY, C_LIGHT_GRAY, C_DARKEST_GRAY, [&](int, int, Interface::Button* const btn) {
 			set_fullscreen(!m_fullscreen);
 			if(m_fullscreen)
 				btn->label = "\u25bc";
@@ -163,8 +171,8 @@ namespace RYSIC
 		m_window->add(m_canvas);
 		
 		auto message_log = CreateRef<Interface::LogContainer>(Rect{0, (m_window->rect.h * 3) / 4, m_window->rect.w, (m_window->rect.h * 1) / 4}, m_world->log());
-		message_log->fg = C_GRAY3;
-		message_log->bg = C_GRAY0;
+		message_log->fg = C_GRAY;
+		message_log->bg = C_DARKEST_GRAY;
 		m_window->add(message_log);
 
 		m_world->message(

@@ -30,7 +30,7 @@ namespace RYSIC::World
 	constexpr Tile TILE_VOID =
 		{false, false, {' ', std::nullopt, std::nullopt}};
 	constexpr Tile TILE_WALL =
-		{false, false, {0x3003, C_GRAY4, C_BLACK}};
+		{false, false, {0x3003, C_LIGHT_GRAY, C_BLACK}};
 	constexpr Tile TILE_FLOOR =
 		{true, true, {0x3000, {{20, 120, 20}}, {{0, 20, 0}}}, 1.0f};
 

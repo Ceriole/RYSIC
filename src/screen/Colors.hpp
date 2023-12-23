@@ -7,19 +7,57 @@ namespace RYSIC
 	using Color = std::optional<TCOD_ColorRGB>;
 	using ColorRGBA = std::optional<TCOD_ColorRGBA>;
 
+	constexpr uint8_t
+			CC_FULL			= 255,
+			CC_HALF			= CC_FULL / 2,
+			CC_QUARTER		= CC_FULL / 4,
+			CC_EIGHTH		= CC_FULL / 8,
+			CC_SIXTEENTH	= CC_FULL / 16,
+			CC_THREEQUARTER	= (CC_FULL * 3) / 4,
+			CC_NONE			= 0;
+
 	constexpr TCOD_ColorRGB
-			C_BLACK = {0, 0, 0},
-			C_GRAY0 = {20, 20, 20},
-			C_GRAY1 = {50, 50, 50},
-			C_GRAY2 = {70, 70, 70},
-			C_GRAY3 = {120, 120, 120},
-			C_GRAY4 = {200, 200, 200},
-			C_WHITE = {255, 255, 255},
-			C_RED = {255, 0, 0},
-			C_DARK_GREEN = {20, 120, 20},
-			C_RED_LIGHT = {255, 80, 80},
-			C_YELLOW = {255, 255, 0},
-			C_CERISOFT = {255, 100, 0};
+			C_BLACK			= {CC_NONE,			CC_NONE,		CC_NONE},
+			C_DARKEST_GRAY	= {CC_SIXTEENTH,	CC_SIXTEENTH,	CC_SIXTEENTH},
+			C_DARK_GRAY		= {CC_EIGHTH,		CC_EIGHTH,		CC_EIGHTH},
+			C_GRAY			= {CC_QUARTER,		CC_QUARTER,		CC_QUARTER},
+			C_LIGHT_GRAY	= {CC_HALF,			CC_HALF,		CC_HALF},
+			C_LIGHTEST_GRAY	= {CC_THREEQUARTER,	CC_THREEQUARTER,CC_THREEQUARTER},
+			C_WHITE			= {CC_FULL, 		CC_FULL,		CC_FULL},
+
+			C_LIGHT_BLUE	= {CC_HALF,			CC_HALF,		CC_FULL},
+			C_BLUE			= {CC_NONE,			CC_NONE,		CC_FULL},
+			C_DARK_BLUE		= {CC_NONE,			CC_NONE,		CC_HALF},
+
+			C_LIGHT_RED		= {CC_FULL,			CC_HALF,		CC_HALF},
+			C_RED			= {CC_FULL,			CC_NONE,		CC_NONE},
+			C_DARK_RED		= {CC_HALF,			CC_NONE,		CC_NONE},
+
+			C_LIGHT_GREEN	= {CC_HALF,			CC_FULL,		CC_HALF},
+			C_GREEN			= {CC_NONE,			CC_FULL,		CC_NONE},
+			C_DARK_GREEN	= {CC_HALF,			CC_NONE,		CC_NONE},
+
+			C_DARK_YELLOW	= {CC_HALF,			CC_HALF,		CC_NONE},
+			C_YELLOW		= {CC_FULL,			CC_FULL,		CC_NONE},
+			C_LIGHT_YELLOW	= {CC_FULL,			CC_FULL,		CC_HALF},
+			
+			C_DARK_CYAN		= {CC_NONE,			CC_HALF,		CC_HALF},
+			C_CYAN			= {CC_NONE,			CC_FULL,		CC_FULL},
+			C_LIGHT_CYAN	= {CC_HALF,			CC_FULL,		CC_FULL},
+
+			C_DARK_MAGENTA	= {CC_HALF,			CC_NONE,		CC_HALF},
+			C_MAGENTA		= {CC_FULL,			CC_NONE,		CC_FULL},
+			C_LIGHT_MAGENTA	= {CC_FULL,			CC_HALF,		CC_FULL},
+
+			C_DARK_ORANGE	= {CC_HALF,			CC_QUARTER,		CC_NONE},
+			C_BROWN 		= C_DARK_ORANGE,
+			C_ORANGE		= {CC_FULL,			CC_HALF,		CC_NONE},
+			C_LIGHT_ORANGE	= {CC_FULL,			CC_HALF,		CC_QUARTER},
+			
+			C_DARK_PURPLE	= {CC_QUARTER,		CC_NONE,		CC_HALF},
+			C_PURPLE		= {CC_HALF,			CC_NONE,		CC_FULL},
+			C_LIGHT_PURPLE	= {CC_HALF,			CC_QUARTER,		CC_FULL};
+			
 	
 	TCOD_ColorRGB GetColorFraction(const TCOD_ColorRGB col, int tone_idx, int tone_cnt);
 	TCOD_ColorRGB DarkenColor(const TCOD_ColorRGB col);

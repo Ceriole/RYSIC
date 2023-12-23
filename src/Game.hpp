@@ -17,7 +17,7 @@ namespace RYSIC
 		tcod::Console m_console;
 		int m_width, m_height;
 		Pos m_mouse;
-		bool m_quit, m_fullscreen;
+		bool m_quit, m_fullscreen, m_debug;
 		int m_exitCode = 0;
 		Ref<Interface::Window> m_window;
 		Ref<Interface::Canvas> m_canvas;
@@ -33,11 +33,15 @@ namespace RYSIC
 		int run();
 		void quit(int code = 0);
 		void set_fullscreen(bool fullscreen);
+		void set_debug(bool debug);
 		void set_title(const std::string &title);
 		World::World* world() const { return m_world; }
 		World::Map* map() const { return m_world->map(); }
 
 		void set_event_handler(EventHandler* handler) { m_event_handler = handler; };
+
+		bool fullscreen() const { return m_fullscreen; }
+		bool debug() const { return m_debug; }
 		
 		static Game* const Instance() { return s_instance; }
 	private:
