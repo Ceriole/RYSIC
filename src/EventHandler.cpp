@@ -1,5 +1,6 @@
 #include "EventHandler.hpp"
 
+#include "Game.hpp"
 #include "Actions.hpp"
 #include "Constants.hpp"
 #include "Log.hpp"
@@ -111,13 +112,13 @@ namespace RYSIC
 			case SDLK_KP_5:
 				return new WaitAction(m_world, (World::Entity*) m_world->player(), Constants::WAIT_LENGTH); // move in place (wait a turn)
 			case SDLK_r:
-				return new VisibilityAction(m_world, (World::Entity*) m_world->player(), VisibilityAction::OMNIPOTENT); // reveal 
+				if(m_game->debug()) return new VisibilityAction(m_world, (World::Entity*) m_world->player(), VisibilityAction::OMNIPOTENT); // reveal 
+				break;
 			case SDLK_f:
-				return new VisibilityAction(m_world, (World::Entity*) m_world->player(), VisibilityAction::HIDE); // hide 
-			default:
-				m_world->message(tcod::stringf(Constants::MSG_NO_ACTION_FOR_KEY, SDL_GetKeyName(event.key.keysym.sym)), Log::MessageType::SYSTEM);
+				if(m_game->debug()) return new VisibilityAction(m_world, (World::Entity*) m_world->player(), VisibilityAction::HIDE); // hide 
 				break;
 			}
+			m_world->message(tcod::stringf(Constants::MSG_NO_ACTION_FOR_KEY, SDL_GetKeyName(event.key.keysym.sym)), Log::MessageType::SYSTEM);
 		}
 		return nullptr;
 	}
