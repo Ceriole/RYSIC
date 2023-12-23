@@ -13,6 +13,8 @@ namespace RYSIC::World::AI
 {
 	void BaseAI::progress(unsigned long tics)
 	{
+		perform();
+
 		if(action.current)
 		{
 			if(action.delay <= tics)
@@ -25,8 +27,6 @@ namespace RYSIC::World::AI
 			else
 				action.delay -= tics;
 		}
-		else
-			perform();
 	}
 
 	std::vector<Pos> BaseAI::get_path_to(const Pos &dest) const
@@ -118,7 +118,6 @@ namespace RYSIC::World::AI
 				return;
 			}
 			m_path = get_path_to(target->pos);
-			fmt::print("enemy path: {}\n", m_path);
 		}
 
 		if(!m_path.empty())

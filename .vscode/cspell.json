@@ -21,14 +21,20 @@
     "EMSDK",
     "Fullscreen",
     "ilammy",
+    "LALT",
+    "LCTRL",
     "libtcod",
     "lodepng",
+    "LSHIFT",
     "lukka",
     "mkdir",
     "MSVC",
     "mymindstorm",
     "preload",
     "pwsh",
+    "RALT",
+    "RCTRL",
+    "RSHIFT",
     "svenstaro",
     "tcod",
     "tileset",
@@ -36,9 +42,7 @@
     "ustar",
     "vcpkg",
     "vsync",
-    "Wextra"
-  ],
-  "ignoreWords": [
+    "Wextra",
     "Andux",
     "Bresenham",
     "COLCTRL",
@@ -64,8 +68,7 @@
     "subconsole",
     "xywh"
   ],
+  "ignoreWords": [],
   "import": [],
-  "enableFiletypes": [
-    "cmake"
-  ]
+  "enableFiletypes": ["cmake"]
 }
