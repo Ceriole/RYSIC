@@ -171,7 +171,7 @@ namespace RYSIC
 		m_window->add(m_canvas);
 		
 		auto message_log = CreateRef<Interface::LogContainer>(Rect{0, (m_window->rect.h * 3) / 4, m_window->rect.w, (m_window->rect.h * 1) / 4}, m_world->log());
-		message_log->fg = C_GRAY;
+		message_log->fg = C_LIGHT_GRAY;
 		message_log->bg = C_DARKEST_GRAY;
 		m_window->add(message_log);
 

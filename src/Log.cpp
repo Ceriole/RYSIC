@@ -23,15 +23,15 @@ namespace RYSIC::Log
 		case MessageType::NORMAL:
 			fg = base_fg;	break;
 		case MessageType::GOOD:
-			fg = {{20, 20, 170}};	break;
+			fg = C_GREEN;	break;
 		case MessageType::BAD:
-			fg = {{170, 20, 20}};	break;
+			fg = C_DARK_RED;	break;
 		case MessageType::GREAT:
-			fg = {{170, 255, 0}};	break;
+			fg = C_LIGHT_GREEN;	break;
 		case MessageType::TERRIBLE:
-			fg = {{255, 170, 0}};	break;
+			fg = C_DARK_MAGENTA;	break;
 		case MessageType::SYSTEM:
-			fg = {{0, 150, 70}};	break;
+			fg = C_ORANGE;	break;
 		}
 
 		if(age() >= Constants::MESSAGE_AGE_STALE)
@@ -50,13 +50,10 @@ namespace RYSIC::Log
 		case MessageType::NORMAL:
 		case MessageType::GOOD:
 		case MessageType::BAD:
-			bg = base_bg;	break;
 		case MessageType::GREAT:
-			bg = {{5, 50, 0}};	break;
 		case MessageType::TERRIBLE:
-			bg = {{50, 0, 0}};	break;
 		case MessageType::SYSTEM:
-			bg = {{0, 75, 50}};	break;
+			bg = base_bg;	break;
 		}
 
 		if(age() >= Constants::MESSAGE_AGE_STALE)
