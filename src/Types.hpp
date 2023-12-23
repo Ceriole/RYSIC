@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include "screen/Colors.hpp"
 
@@ -77,6 +77,11 @@ namespace RYSIC
 		{ return sqrt(pow(b.x - x, 2) + pow(b.y - y, 2)); }
 		int chebyshev(const Pos& b) const
 		{ return MAX(abs(b.x - x), abs(b.y - y)); }
+
+		friend std::ostream& operator<<(std::ostream& os, const RYSIC::Pos& pos)
+		{
+			return os << "(" << pos.x << ", " << pos.y << ")";
+		}
 	};
 
 	struct Rect
@@ -108,6 +113,11 @@ namespace RYSIC
 
 		inline const Pos center() const { return {x + (w / 2), y + (h / 2)}; }
 		inline const Rect inner(int thickness = 1) const { return {x + thickness, y + thickness, w - (thickness * 2), h - (thickness * 2)}; }
+
+		friend std::ostream& operator<<(std::ostream& os, const RYSIC::Rect& pos)
+		{
+			return os << "(" << pos.x << ", " << pos.y << ", " << pos.w << ", " << pos.h << ")";
+		}
 	};
 
 	struct Glyph
@@ -149,24 +159,5 @@ namespace RYSIC
 	
 }
 
-template<>
-struct fmt::formatter<RYSIC::Pos>
-{
-	template<typename ParseContext>
-	constexpr auto parse(ParseContext& ctx)
-	{ return ctx.begin(); }
-	template<typename FormatContext>
-	auto format(const RYSIC::Pos &p, FormatContext& ctx)
-	{ return fmt::format_to(ctx.out(), "{}, {}", p.x, p.y); }
-};
-
-template<>
-struct fmt::formatter<RYSIC::Rect>
-{
-	template<typename ParseContext>
-	constexpr auto parse(ParseContext& ctx)
-	{ return ctx.begin(); }
-	template<typename FormatContext>
-	auto format(const RYSIC::Rect &r, FormatContext& ctx)
-	{ return fmt::format_to(ctx.out(), "{}, {}, {}, {}", r.x, r.y, r.w, r.h); }
-};
+template <> struct fmt::formatter<RYSIC::Pos> : ostream_formatter {};
+template <> struct fmt::formatter<RYSIC::Rect> : ostream_formatter {};

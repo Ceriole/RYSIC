@@ -4,14 +4,14 @@
 #include "Constants.hpp"
 #include "Game.hpp"
 
+#include <fmt/format.h>
+
 namespace RYSIC::Log
 {
 
 	const std::string Message::str() const
 	{
-		char buf[6];
-		sprintf_s(buf, "(x%d)", MIN(count + 1, 99));
-		return msg + (count > 0 ? buf : "");
+		return msg + (count > 0 ? fmt::format("(x{})", MIN(count + 1, 99)) : "");
 	}
 
 	const Color Message::fg_color(const Color& base_fg) const
