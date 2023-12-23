@@ -19,13 +19,14 @@ inline void print_libs()
 
 int main(int argc, char* argv[])
 {
-#ifdef RYSIC_DEBUG
-	fmt::print("RYSIC {}\n", RYSIC_VERSION_STR);
-	print_libs();
-#endif
 	auto params = TCOD_ContextParams{};
 	params.argc = argc;
 	params.argv = argv;
 	auto game = RYSIC::Game(params, RYSIC::Constants::DEFAULT_WIDTH, RYSIC::Constants::DEFAULT_HEIGHT);
+#ifdef RYSIC_DEBUG
+	fmt::print("RYSIC {}\n", RYSIC_VERSION_STR);
+	print_libs();
+	game.set_debug(true);
+#endif
 	return game.run();
 }

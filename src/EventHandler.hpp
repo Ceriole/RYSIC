@@ -29,6 +29,9 @@ namespace RYSIC
 
 	protected:
 		virtual Action* get_action_from_SDL_event(SDL_Event &event);
+	
+	private:
+		bool handle_modifier_keys(SDL_Event &event);
 	};
 
 	class GameplayEventHandler : public virtual EventHandler

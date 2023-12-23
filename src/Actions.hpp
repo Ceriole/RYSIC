@@ -43,6 +43,26 @@ namespace RYSIC
 		virtual void perform() override;
 	};
 
+	class FullscreenToggleAction : public SystemAction
+	{
+	public:
+		FullscreenToggleAction(Game* game)
+			: SystemAction(game)
+		{}
+
+		virtual void perform() override;
+	};
+
+	class DebugToggleAction : public SystemAction
+	{
+	public:
+		DebugToggleAction(Game* game)
+			: SystemAction(game)
+		{}
+
+		virtual void perform() override;
+	};
+
 	class WorldAction : public Action
 	{
 	protected:

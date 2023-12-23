@@ -8,8 +8,8 @@
 
 namespace RYSIC
 {
-	
-	void EventHandler::handle(SDL_Event &event)
+
+	bool EventHandler::handle_modifier_keys(SDL_Event &event)
 	{
 		if(event.type == SDL_KEYDOWN)
 		{
@@ -17,13 +17,13 @@ namespace RYSIC
 			{
 			case SDLK_LSHIFT:
 			case SDLK_RSHIFT:
-				m_shift = true; return;
+				m_shift = true; return true;
 			case SDLK_RCTRL:
 			case SDLK_LCTRL:
-				m_ctrl = true; return;
+				m_ctrl = true; return true;
 			case SDLK_LALT:
 			case SDLK_RALT:
-				m_alt = true; return;
+				m_alt = true; return true;
 			}
 		}
 		else if(event.type == SDL_KEYUP)
@@ -32,15 +32,22 @@ namespace RYSIC
 			{
 			case SDLK_LSHIFT:
 			case SDLK_RSHIFT:
-				m_shift = false; return;
+				m_shift = false; return true;
 			case SDLK_RCTRL:
 			case SDLK_LCTRL:
-				m_ctrl = false; return;
+				m_ctrl = false; return true;
 			case SDLK_LALT:
 			case SDLK_RALT:
-				m_alt = false; return;
+				m_alt = false; return true;
 			}
 		}
+		return false;
+	}
+	
+	void EventHandler::handle(SDL_Event &event)
+	{
+		if(handle_modifier_keys(event))
+			return;
 
 		Action* action = get_action_from_SDL_event(event);
 		if(!action)
@@ -59,6 +66,10 @@ namespace RYSIC
 			{
 			case SDLK_ESCAPE:
 				return new ExitAction(m_game); // quit
+			case SDLK_F1:
+				return new DebugToggleAction(m_game);
+			case SDLK_F4:
+				return new FullscreenToggleAction(m_game);
 			}
 		}
 		return nullptr;

@@ -14,6 +14,18 @@ namespace RYSIC
 		m_game->quit();
 	}
 
+	void FullscreenToggleAction::perform()
+	{
+		m_game->set_fullscreen(!m_game->fullscreen());
+	}
+	
+	void DebugToggleAction::perform()
+	{
+		m_game->set_debug(!m_game->debug());
+		if(m_game->world())
+			m_game->world()->message(fmt::format("Debug {}.", m_game->debug() ? "enabled" : "disabled"), Log::SYSTEM);
+	}
+
 	void WaitAction::perform()
 	{
 		if(m_entity == m_world->player())
@@ -109,9 +121,9 @@ namespace RYSIC
 				if(!actor)
 					return;
 				int damage = actor->stats.physical_power() - target_actor->stats.physical_defense();
-				std::string attack_desc = tcod::stringf("%s attacks %s, ", m_entity->name.c_str(), target_actor->name.c_str());
+				std::string attack_desc = fmt::format("{} attacks {}, ", m_entity->name, target_actor->name);
 				if(damage > 0)
-					attack_desc += tcod::stringf("dealing %d damage!", damage);
+					attack_desc += fmt::format("dealing {} damage!", damage);
 				else
 					attack_desc += "but deals no damage.";
 				m_world->announce(attack_desc, m_entity->pos);
@@ -152,5 +164,4 @@ namespace RYSIC
 				MovementAction(m_world, m_entity, m_target).perform();
 		}
 	}
-
 }
