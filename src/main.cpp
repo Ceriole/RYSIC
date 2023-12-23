@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 	auto game = RYSIC::Game(params, RYSIC::Constants::DEFAULT_WIDTH, RYSIC::Constants::DEFAULT_HEIGHT);
 #ifdef RYSIC_DEBUG
 	fmt::print("RYSIC {}\n", RYSIC_VERSION_STR);
+	fmt::print("DEBUG BUILD\n");
 	print_libs();
 	game.set_debug(true);
 #endif
