@@ -99,37 +99,44 @@ namespace RYSIC::World::AI
 
 	void HostileAI::perform()
 	{
-		bool has_seen_player = sees_player;
-		Entity* target = world()->player();
-		sees_player = map()->can_see(m_actor->pos, target->pos, m_actor->stats.vision_radius());
-		if(sees_player)
+		if(action.current && !is_action<WaitAction>()) // if there is a non-wait action queued up, skip the AI routine
+			return;
+		bool has_seen_target = sees_target;	// store if the actor has previously seen the player
+		Entity* target = world()->player();	// store the target (player only for now)
+		// check if actor can see target
+		sees_target = map()->can_see(m_actor->pos, target->pos, m_actor->stats.vision_radius());
+		if(sees_target) // if the actor sees the target
 		{
-			if(!has_seen_player)
+			if(!has_seen_target) // if actor just saw the target
 			{
-				if(is_action<WaitAction>())
-					start_action(nullptr);
-				world()->announce(fmt::format("The {} points at you with malicious intent!", m_actor->name), m_actor->pos, Log::BAD);
+				start_action(nullptr); // clear the current action
+				world()->announce( // send a message to the log, the enemy is declaring intent!
+					fmt::format("The {} points at you with malicious intent!", m_actor->name),
+					m_actor->pos, Log::BAD);
 			}
-			last_seen_player_pos = target->pos;
 			int d = m_actor->pos.chebyshev(target->pos);
-			if(d <= 1)
+			// get the max distance between x and y positions between the actor and the target
+			// chebyshev is not an absolute distance, the partial difference between the actor and the target
+			// x or y, whatever is greater.
+			if(d <= 1) // if the actor is inside(!?) or next to the target, start attacking!
 			{
 				start_action(new MeleeAction(world(), m_actor, target->pos - m_actor->pos));
-				return;
+				m_path.clear(); // clear the path
+				return; // exit the routine
 			}
-			m_path = get_path_to(target->pos);
+			m_path = get_path_to(target->pos); // store the path to the target
 		}
 
-		if(!m_path.empty())
+		if(!m_path.empty()) // if there is a path to the target
 		{
+			// move to the next position in the path, then remove that part of the path
 			auto &dest = m_path.back();
 			start_action(new MovementAction(world(), m_actor, dest - m_actor->pos));
 			m_path.pop_back();
-			return;
 		}
-		else if(rand() % 10 < 2)
+		else if(rand() % 10 < 2) // if there is no path, either wander (20%)...
 			start_action(new MovementAction(world(), m_actor, {(rand() % 3) - 1, ((rand() % 3) - 1)}));
-		else
+		else // ... or wait
 			start_action(new WaitAction(world(), m_actor, 10));
 	}
 

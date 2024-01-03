@@ -6,6 +6,9 @@
 #include "Map.hpp"
 #include "entity/Actor.hpp"
 #include "entity/AI.hpp"
+#include "screen/ScreenUtil.hpp"
+#include "Game.hpp"
+#include "screen/GameInterface.hpp"
 
 namespace RYSIC::World
 {
@@ -14,16 +17,6 @@ namespace RYSIC::World
 	{
 		set_map(nullptr);
 		delete m_player;
-	}
-
-	const std::string World::short_time_string() const
-	{
-		return Util::short_time_to_string(time());
-	}
-
-	const std::string World::time_string() const
-	{
-		return Util::time_to_string(time());
 	}
 
 	void World::set_map(Map *map)
@@ -55,22 +48,88 @@ namespace RYSIC::World
 	{
 		if(!m_current_map)
 			return;
-		m_current_map->render(console, m_player->pos, win_w, win_h);
+		Pos cam_center = m_player->pos;
+		if(m_target.enabled)
+			cam_center = m_target.pos;
+		m_current_map->render(console, cam_center, win_w, win_h);
+		if(m_target.enabled && (SDL_GetTicks64() % 300) < 150)
+			Util::Screen::set_char(console, win_w / 2, win_h / 2, GLYPH_TARGET);
+	}
+
+	void World::targeting_start(const Pos &origin, int max_distance)
+	{
+		if(m_target.enabled)
+			return;
+		m_target.enabled = true;
+		m_target.origin = m_target.pos = origin;
+		m_target.max_distance = max_distance;
+	}
+
+	void World::targeting_move(const Pos &target)
+	{
+		if(!m_target.enabled)
+			return;
+		Pos new_pos = m_target.pos + target;
+		if(m_current_map)
+		{
+			new_pos.x = CLAMP(0, (int) m_current_map->width(), new_pos.x);
+			new_pos.y = CLAMP(0, (int) m_current_map->height(), new_pos.y);
+		}
+		Pos diff = new_pos - m_target.origin;
+		if(m_target.max_distance)
+		{
+			if(abs(diff.x) <= m_target.max_distance && abs(diff.y) <= m_target.max_distance)
+				m_target.pos = new_pos;
+		}
+		else
+			m_target.pos = new_pos;
+		
+		if(m_current_map && m_current_map->in_bounds(m_target.pos))
+		{
+			if(m_current_map->is_visible(m_target.pos))
+			{
+				if(auto actor = dynamic_cast<Actor*>(m_current_map->blocking_entity_at(m_target.pos)); actor)
+					Game::Instance()->character_panel()->set_character(actor);
+				else
+					Game::Instance()->character_panel()->set_description("Tile", m_current_map->at(m_target.pos)->name);
+			}
+			else
+				Game::Instance()->character_panel()->set_unseen();
+		}
+		else
+			Game::Instance()->character_panel()->clear();
+	}
+
+	void World::targeting_end()
+	{
+		if(!m_target.enabled)
+			return;
+		if(m_target.action)
+		{
+			m_target.action->set(m_target.pos);
+			m_target.action->perform();
+			delete m_target.action;
+		}
+		m_target.enabled = false;
+		m_target.origin = m_target.pos = {0,0};
+		m_target.max_distance = 0;
+		m_target.action = nullptr;
+		Game::Instance()->character_panel()->set_character(m_player);
 	}
 
 	void World::progress(unsigned long tics)
 	{
-		m_tics += tics;
+		m_time.progress(tics);
 		if(m_current_map)
 			m_current_map->progress(tics);
 	}
 
-	void World::message(const std::string &msg, Log::MessageType type)
+	void World::message(const std::string_view msg, Log::MessageType type)
 	{
-		m_log.message({msg, type, m_tics});
+		m_log.message({std::string(msg), type, m_time.tics});
 	}
 
-	void World::announce(const std::string &msg, const Pos &origin, Log::MessageType type)
+	void World::announce(const std::string_view msg, const Pos &origin, Log::MessageType type)
 	{
 		if(!m_current_map)
 			return;

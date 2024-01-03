@@ -26,6 +26,7 @@ namespace RYSIC::World
 	struct StatComponent : public BaseComponent
 	{
 	protected:
+		Stat::Level _level;
 		Stat::Bounded health;
 		Stat::Attribute<Constants::STAT_BASE_VALUE> tenacity;
 		Stat::Attribute<Constants::STAT_BASE_VALUE> vivacity;
@@ -39,14 +40,20 @@ namespace RYSIC::World
 			: BaseComponent(actor), tenacity{ten}, vivacity{viv}, sagacity{sag}
 		{ recalculate(); }
 
-		void set_tenacity(int value) { tenacity.set(value); recalculate(); }
-		int get_tenacity() const { return tenacity.get(); }
+		void set_ten(int value) { tenacity.set(value); recalculate(); }
+		void set_ten_mod(int value) { tenacity.mod = value; recalculate(); }
+		int ten() const { return tenacity.get(); }
+		int ten_mod() { return tenacity.mod; }
+		
+		void set_viv(int value) { vivacity.set(value); recalculate(); }
+		void set_viv_mod(int value) { tenacity.mod = value; recalculate(); }
+		int viv() const { return vivacity.get(); }
+		int viv_mod() { return tenacity.mod; }
 
-		void set_vivacity(int value) { vivacity.set(value); recalculate(); }
-		int get_vivacity() const { return vivacity.get(); }
-
-		void set_sagacity(int value) { sagacity.set(value); recalculate(); }
-		int get_sagacity() const { return sagacity.get(); }
+		void set_sag(int value) { sagacity.set(value); recalculate(); }
+		void set_sag_mod(int value) { sagacity.mod = value; recalculate(); }
+		int sag() const { return sagacity.get(); }
+		int sag_mod() { return sagacity.mod; }
 
 		unsigned long move_speed() const;
 		unsigned int vision_radius() const;
@@ -58,8 +65,19 @@ namespace RYSIC::World
 
 		int hp() const { return health.get(); };
 		int max_hp() const { return health.max; };
-		float hp_ratio() const { return (float) hp() / (float) max_hp(); }
+		float hp_ratio() const { return CLAMP(0.0f, 1.0f, (float) hp() / (float) max_hp()); }
 		void modify_hp(int amount);
+
+
+		int level() const { return _level.get(); }
+		int xp() const { return _level.get_xp(); }
+		int xp_to_next() const { return _level.get_to_next(); }
+		int xp_left() const { return xp_to_next() - xp(); }
+		float xp_ratio() const { return CLAMP(0.0f, 1.0f, (float) xp() / (float) xp_to_next()); };
+		void add_xp(int amount);
+		void set_xp_listener(Stat::Level::ChangeCallback _callback) { _level.set_xp_listener(_callback); }
+		void set_level_listener(Stat::Level::ChangeCallback _callback) { _level.set_level_listener(_callback); }
+
 	private:
 		void recalculate();
 	};

@@ -102,7 +102,7 @@ namespace RYSIC
 	class DirectionalAction : public EntityAction
 	{
 	protected:
-		const Pos m_target;
+		Pos m_target;
 		enum Direction
 		{
 			NONE, NORTH, SOUTH, EAST, WEST,
@@ -114,6 +114,7 @@ namespace RYSIC
 			: EntityAction(world, entity), m_target(target)
 		{}
 
+		void set(const Pos& target) { m_target = target; };
 		Direction dir() const;
 		const Pos destination() const;
 		World::Entity *get_blocking_entity() const;
@@ -137,6 +138,44 @@ namespace RYSIC
 	public:
 		MovementAction(World::World* world, World::Entity* entity, const Pos& target)
 			: DirectionalAction(world, entity, target)
+		{}
+
+		virtual void perform() override;
+	};
+
+	class StartTargetAction : public WorldAction
+	{
+	protected:
+		Game* m_game;
+		const Pos m_origin;
+		const int m_max_distance;
+	public:
+		StartTargetAction(Game* game, World::World* world, const Pos& origin, int max_distance = 0)
+			: WorldAction(world), m_game(game), m_origin(origin), m_max_distance(max_distance)
+		{}
+
+		virtual void perform() override;
+	};
+
+	class MoveTargetAction : public WorldAction
+	{
+	protected:
+		const Pos m_target;
+	public:
+		MoveTargetAction(World::World* world, const Pos& target)
+			: WorldAction(world), m_target(target)
+		{}
+
+		virtual void perform() override;
+	};
+
+	class EndTargetAction : public WorldAction
+	{
+	protected:
+		Game* m_game;
+	public:
+		EndTargetAction(Game* game, World::World* world)
+			: WorldAction(world), m_game(game)
 		{}
 
 		virtual void perform() override;

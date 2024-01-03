@@ -22,7 +22,7 @@ namespace RYSIC::Interface
 		virtual bool remove(Ref<Component> comp) = 0;
 		virtual void clear() = 0;
 
-		virtual bool layout() const = 0;
+		virtual bool finalize() const = 0;
 	};
 
 	class BorderLayout : public LayoutManager
@@ -44,7 +44,7 @@ namespace RYSIC::Interface
 		virtual bool remove(Ref<Component> comp) override;
 		virtual void clear() override;
 
-		virtual bool layout() const override;
+		virtual bool finalize() const override;
 	private:
 		using LayoutManager::add;
 	};

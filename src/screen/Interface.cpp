@@ -154,6 +154,21 @@ namespace RYSIC::Interface
 		return pos;
 	}
 
+	const Rect Frame::get_content_rect() const
+	{
+		Rect _rect = rect;
+		switch (decoration)
+		{
+		case BORDERED:		_rect.x += 1, _rect.y += 1, _rect.w -= 1, _rect.h -= 1;	break;
+		case HEADER:		_rect.y += 1;
+		case FOOTER:		_rect.h -= 1; break;
+		case SIDEBAR_L:		_rect.x += 1;
+		case SIDEBAR_R:		_rect.w -= 1; break;
+		case NONE:			break;
+		}
+		return _rect;
+	}
+
 	void Window::render(TCOD_Console &console)
 	{
 		if(!enabled)
@@ -252,7 +267,8 @@ namespace RYSIC::Interface
 	{
 		if(!enabled)
 			return;
-		tcod::print(console, {rect.x, rect.y}, text, fg, bg, alignmentToTCOD(align));	// print text (mm simple)
+		Util::Screen::fill_rect(console, rect, 0, fg, bg);
+		tcod::print_rect(console, rect, text, fg, bg, alignmentToTCOD(align));	// print text (mm simple)
 	}
 
 	void Button::render(TCOD_Console &console)
@@ -394,61 +410,26 @@ namespace RYSIC::Interface
 		if(!enabled)
 			return;
 		
-		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, std::nullopt, bg);
+		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
 
+		int bar_size;
 		switch (direction)
 		{
 		default:
 		case HORIZONTAL:
-			Util::Screen::fill_rect(subconsole, {0, 0, (int) round(rect.w * value), rect.h}, 0, bg, fg); break;
+			bar_size = (int) round(rect.w * value);
+			if(bar_size > 0)
+				Util::Screen::fill_rect(subconsole, {0, 0, bar_size, rect.h}, 0, bg, fg);
+			break;
 		case VERTICAL:
-			Util::Screen::fill_rect(subconsole, {0, 0, rect.w, (int) round(rect.h * value)}, 0, bg, fg); break;
+			bar_size = (int) round(rect.h * value);
+			if(bar_size > 0)
+				Util::Screen::fill_rect(subconsole, {0, 0, rect.w, bar_size}, 0, bg, fg);
+			break;
 		}
 		
 		tcod::print_rect(subconsole, {0, 0, 0, 0}, text, label_color, std::nullopt, alignmentToTCOD(align));
 
 		tcod::blit(console, subconsole, {rect.x, rect.y});				// blit canvas to console
-	}
-
-	void LogContainer::render(TCOD_Console &console)
-	{
-		if(!enabled)
-			return;
-
-		tcod::Console subconsole = Util::Screen::CreateComponentCanvas(rect.w, rect.h, fg, bg);
-
-		if(m_log)
-		{
-		tcod::Console message_box = Util::Screen::CreateComponentCanvas(rect.w, rect.h - 1, fg, bg);
-			int y = rect.h - 1;
-			for(auto msg = m_log->end(); msg != m_log->begin();)
-			{
-				--msg;
-				if(msg->age() >= Constants::MESSAGE_AGE_OLD)
-					continue;
-				y -= tcod::get_height_rect(rect.w, msg->str());
-				tcod::print_rect(message_box, {0, y, rect.w, 0}, msg->str(), msg->fg_color(fg),  msg->bg_color(bg));
-				if(y < 1)
-					break;
-			}
-			tcod::blit(subconsole, message_box, {0, 1});
-		}
-		else
-		{
-			tcod::print_rect(subconsole, {0, rect.h / 2, rect.w, 0}, "Null.", std::nullopt, std::nullopt, TCOD_CENTER);
-		}
-		
-
-		Util::Screen::draw_hline(subconsole, 0, 0, 0, 0x2550, std::nullopt, std::nullopt);
-		const Pos& player_pos = Game::Instance()->world()->player()->pos;
-		tcod::print_rect(subconsole, {1, 0, rect.w, 1},
-			tcod::stringf("\u2561POS: %d, %d\u255e", player_pos.x, player_pos.y),
-			std::nullopt, std::nullopt, TCOD_LEFT);
-		tcod::print_rect(subconsole, {0, 0, rect.w - 1, 1},
-			tcod::stringf("\u2561TIME: %s\u255e", Game::Instance()->world()->short_time_string().c_str()),
-			std::nullopt, std::nullopt, TCOD_RIGHT);
-		tcod::print_rect(subconsole, {0, 0, rect.w, 1}, "\u2561MESSAGE LOG\u255e", std::nullopt, std::nullopt, TCOD_CENTER);
-
-		tcod::blit(console, subconsole, {rect.x, rect.y});
 	}
 }

@@ -120,17 +120,7 @@ namespace RYSIC
 				auto actor = dynamic_cast<World::Actor*>(m_entity);
 				if(!actor)
 					return;
-				int damage = actor->stats.physical_power() - target_actor->stats.physical_defense();
-				std::string attack_desc = fmt::format("{} attacks {}, ", m_entity->name, target_actor->name);
-				if(damage > 0)
-					attack_desc += fmt::format("dealing {} damage!", damage);
-				else
-					attack_desc += "but deals no damage.";
-				m_world->announce(attack_desc, m_entity->pos);
-				if(damage > 0)
-					target_actor->stats.modify_hp(-damage);
-				if(m_world->player() == m_entity)
-					m_world->progress(actor->stats.move_speed());
+				actor->melee_attack(target_actor);
 			}
 		}
 	}
@@ -164,4 +154,22 @@ namespace RYSIC
 				MovementAction(m_world, m_entity, m_target).perform();
 		}
 	}
+
+	void StartTargetAction::perform()
+	{
+		m_game->set_event_handler(new TargetEventHandler(m_game, m_world));
+		m_world->targeting_start(m_origin, m_max_distance);
+	}
+
+	void MoveTargetAction::perform()
+	{
+		m_world->targeting_move(m_target);
+	}
+
+	void EndTargetAction::perform()
+	{
+		m_world->targeting_end();
+		m_game->set_event_handler(new GameplayEventHandler(m_game, m_world));
+	}
+
 }

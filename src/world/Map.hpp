@@ -12,6 +12,7 @@ namespace RYSIC::World
 
 	struct Tile
 	{
+		const char* name;
 		bool walkable, transparent;
 		Glyph gfx;
 		float walk_cost = 1.0f;
@@ -26,13 +27,13 @@ namespace RYSIC::World
 	};
 
 	constexpr Glyph GLYPH_UNSEEN =
-		{' ', C_WHITE, std::nullopt};
+		{' ', C_DARKEST_GRAY, std::nullopt};
 	constexpr Tile TILE_VOID =
-		{false, false, {' ', std::nullopt, std::nullopt}};
+		{"VOID", false, false, {' ', std::nullopt, std::nullopt}};
 	constexpr Tile TILE_WALL =
-		{false, false, {0x3003, C_LIGHT_GRAY, C_BLACK}};
+		{"Stone Wall", false, false, {0x3003, C_LIGHT_GRAY, C_BLACK}};
 	constexpr Tile TILE_FLOOR =
-		{true, true, {0x3000, {{20, 120, 20}}, {{0, 20, 0}}}, 1.0f};
+		{"Cygrass", true, true, {0x3000, C_DARK_CYAN, C_BLACK}, 1.0f};
 
 	class Map
 	{
@@ -75,6 +76,7 @@ namespace RYSIC::World
 		bool hide(const Pos& xy);
 		bool remember(const Pos& xy);
 		bool forget(const Pos& xy);
+		bool is_visible(const Pos& xy);
 
 		float get_movement_cost(const Pos &from, const Pos &to) const;
 

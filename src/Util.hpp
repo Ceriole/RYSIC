@@ -19,7 +19,4 @@ namespace RYSIC::Util
 	constexpr bool isAt(int x, int y, int px, int py)
 		{ return x == px && y == py; }
 	
-	extern std::string short_time_to_string(unsigned long time);
-	extern std::string time_to_string(unsigned long time);
-	
 }

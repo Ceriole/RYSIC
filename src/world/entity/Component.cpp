@@ -68,6 +68,11 @@ namespace RYSIC::World
 			m_actor->die();
 	}
 
+	void StatComponent::add_xp(int amount)
+	{
+		_level.modify_xp(amount);
+	}
+
 	void StatComponent::recalculate()
 	{
 		health.set_max(MAX(

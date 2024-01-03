@@ -112,7 +112,8 @@
     "span": "cpp",
     "bitset": "cpp",
     "variant": "cpp",
-    "*.in": "cpp"
+    "*.in": "cpp",
+    "*.rh": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "cSpell.diagnosticLevel": "Hint"

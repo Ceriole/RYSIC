@@ -19,11 +19,8 @@ namespace RYSIC
 		
 	public:
 		EventHandler(Game* game)
-			: m_game(game)
+			: m_game(game), m_shift(false), m_ctrl(false), m_alt(false)
 		{}
-		~EventHandler()
-		{}
-		
 		
 		virtual void handle(SDL_Event &event);
 
@@ -34,7 +31,7 @@ namespace RYSIC
 		bool handle_modifier_keys(SDL_Event &event);
 	};
 
-	class GameplayEventHandler : public virtual EventHandler
+	class GameplayEventHandler : public EventHandler
 	{
 	protected:
 		World::World* m_world;
@@ -47,12 +44,23 @@ namespace RYSIC
 		virtual Action* get_action_from_SDL_event(SDL_Event &event) override;
 	};
 
-	class GameOverEventHandler : public virtual EventHandler
+	class GameOverEventHandler : public EventHandler
 	{
 	public:
 		GameOverEventHandler(Game* game)
 			: EventHandler(game)
 		{}
+	};
+
+	class TargetEventHandler : public GameplayEventHandler
+	{
+	public:
+		TargetEventHandler(Game* game, World::World* world)
+			: GameplayEventHandler(game, world)
+		{}
+
+	protected:
+		virtual Action* get_action_from_SDL_event(SDL_Event &event) override;
 	};
 
 }

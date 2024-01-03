@@ -205,8 +205,7 @@ namespace RYSIC::World
 
 	bool Map::reveal(const Pos &xy)
 	{
-		TileAttributes* ta = attrib_at(xy);
-		if(ta != nullptr)
+		if(auto ta = attrib_at(xy); ta)
 		{
 			bool old = ta->visible;
 			ta->explored = ta->visible = true;
@@ -217,8 +216,8 @@ namespace RYSIC::World
 
 	bool Map::hide(const Pos & xy)
 	{
-		TileAttributes* ta = attrib_at(xy);
-		if(ta != nullptr)
+		
+		if(auto ta = attrib_at(xy); ta)
 		{
 			bool old = ta->visible;
 			ta->visible = false;
@@ -229,8 +228,8 @@ namespace RYSIC::World
 
 	bool Map::remember(const Pos &xy)
 	{
-		TileAttributes* ta = attrib_at(xy);
-		if(ta != nullptr)
+		
+		if(auto ta = attrib_at(xy); ta)
 		{
 			bool old = ta->explored;
 			ta->explored = true;
@@ -241,9 +240,15 @@ namespace RYSIC::World
 
 	bool Map::forget(const Pos & xy)
 	{
-		TileAttributes* ta = attrib_at(xy);
-		if(ta != nullptr)
+		if(auto ta = attrib_at(xy); ta)
 			ta->explored = false;
+		return false;
+	}
+
+	bool Map::is_visible(const Pos &xy)
+	{
+		if(auto ta = attrib_at(xy); ta)
+			return ta->visible;
 		return false;
 	}
 

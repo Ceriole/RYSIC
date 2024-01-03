@@ -46,8 +46,7 @@ namespace RYSIC::World
 		{
 		private:
 			std::vector<Pos> m_path;
-			bool sees_player;
-			Pos last_seen_player_pos;
+			bool sees_target;
 
 		public:
 			HostileAI(Actor* actor)

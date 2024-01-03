@@ -54,6 +54,7 @@ namespace RYSIC::Interface
 
 		const Container* get_parent() const { return parent; };
 		const Pos get_abs_pos() const;
+		virtual const Rect get_content_rect() const { return rect; };
 
 		friend class Container;
 		friend class Window;
@@ -79,6 +80,8 @@ namespace RYSIC::Interface
 		bool add(const Ref<Component> comp);
 		bool remove(const Ref<Component> comp);
 		void remove_all();
+
+		size_t component_count() const { return children.size(); }
 	};
 
 	class Frame : public Container
@@ -108,6 +111,8 @@ namespace RYSIC::Interface
 
 		virtual void render(TCOD_Console &console) override;
 		virtual const Pos get_abs_pos_of_child(const Component* child) const override;
+
+		virtual const Rect get_content_rect() const override;
 	};
 
 	class Window : public Frame
@@ -149,8 +154,14 @@ namespace RYSIC::Interface
 		Label(const Pos &_pos, const std::string &_text)
 			: Component(_pos), text(_text)
 		{}
-		Label(const Pos &_pos, std::string _text, Color _fg, Color _bg)
+		Label(const Rect &_rect, const std::string &_text)
+			: Component(_rect), text(_text)
+		{}
+		Label(const Pos &_pos, const std::string &_text, Color _fg, Color _bg)
 			: Component(_pos), text(_text), fg(_fg), bg(_bg)
+		{}
+		Label(const Rect &_rect, const std::string &_text, Color _fg, Color _bg)
+			: Component(_rect), text(_text), fg(_fg), bg(_bg)
 		{}
 
 		virtual void render(TCOD_Console &console) override;
@@ -242,21 +253,5 @@ namespace RYSIC::Interface
 
 		void set(float _value) { value = CLAMP(0.0f, 1.0f, _value); };
 		const float get() const { return value; };
-	};
-
-	class LogContainer : public Component
-	{
-	public:
-		Color fg, bg;
-	private:
-		Log::MessageFeed* m_log;
-
-	public:
-		LogContainer() = default;
-		LogContainer(const Rect& _rect, Log::MessageFeed* log)
-			: Component(_rect), m_log(log)
-		{}
-
-		virtual void render(TCOD_Console &console) override;
 	};
 }

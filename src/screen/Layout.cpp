@@ -29,12 +29,12 @@ namespace RYSIC::Interface
 		m_components.clear();
 	}
 
-	bool BorderLayout::layout() const
+	bool BorderLayout::finalize() const
 	{
 		int laid_out = 0;
 		Ref<Component> locations[Location::Location_NR_ITEMS];
 
-		const auto [px, py, pw, ph] = m_parent->rect;
+		const auto [px, py, pw, ph] = m_parent->get_content_rect();
 
 		for(auto [comp, loc] : m_components)
 		{
@@ -45,7 +45,7 @@ namespace RYSIC::Interface
 			}
 		}
 
-		int left = 0, right = pw - 1, top = 0, bottom = ph - 1;
+		int left = 0, right = pw, top = 0, bottom = ph;
 
 		if(m_vertical) // vertical layout
 		{
@@ -55,6 +55,8 @@ namespace RYSIC::Interface
 				comp->rect.x = right;
 				comp->rect.y = 0;
 				comp->rect.h = ph;
+
+				m_parent->add(comp);
 			}
 			if(auto comp = locations[Location::WEST]; comp)
 			{
@@ -62,20 +64,26 @@ namespace RYSIC::Interface
 				comp->rect.x = 0;
 				comp->rect.y = 0;
 				comp->rect.h = ph;
+
+				m_parent->add(comp);
 			}
 			if(auto comp = locations[Location::NORTH]; comp)
 			{
-				left += comp->rect.w;
 				top += comp->rect.h;
 				comp->rect.x = left;
 				comp->rect.y = 0;
+				comp->rect.w = right - left;
+				
+				m_parent->add(comp);
 			}
 			if(auto comp = locations[Location::SOUTH]; comp)
 			{
 				bottom -= comp->rect.h;
-				comp->rect.x = right;
+				comp->rect.x = left;
 				comp->rect.y = bottom;
 				comp->rect.w = right - left;
+
+				m_parent->add(comp);
 			}
 		}
 		else // horizontal layout
@@ -86,6 +94,8 @@ namespace RYSIC::Interface
 				comp->rect.x = 0;
 				comp->rect.y = 0;
 				comp->rect.w = pw;
+
+				m_parent->add(comp);
 			}
 			if(auto comp = locations[Location::SOUTH]; comp)
 			{
@@ -93,6 +103,8 @@ namespace RYSIC::Interface
 				comp->rect.x = 0;
 				comp->rect.y = bottom;
 				comp->rect.w = pw;
+
+				m_parent->add(comp);
 			}
 			if(auto comp = locations[Location::EAST]; comp)
 			{
@@ -100,22 +112,29 @@ namespace RYSIC::Interface
 				comp->rect.x = right;
 				comp->rect.y = top;
 				comp->rect.h = bottom - top;
+
+				m_parent->add(comp);
 			}
 			if(auto comp = locations[Location::WEST]; comp)
 			{
 				left += comp->rect.w;
-				comp->rect.x = left;
+				comp->rect.x = 0;
 				comp->rect.y = top;
 				comp->rect.h = bottom - top;
+
+				m_parent->add(comp);
 			}
 		}
 		if(auto comp = locations[Location::CENTER]; comp)
 		{
-			comp->rect.x = right;
+			comp->rect.x = left;
 			comp->rect.y = top;
 			comp->rect.w = right - left;
 			comp->rect.h = bottom - top;
+
+			m_parent->add(comp);
 		}
-		return laid_out == m_components.size();
+
+		return (laid_out == m_components.size()) && (laid_out == m_parent->component_count());
 	}
 }

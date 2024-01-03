@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <libtcod.hpp>
 
-#include "screen/Interface.hpp"
+#include "screen/GameInterface.hpp"
 #include "world/World.hpp"
 #include "EventHandler.hpp"
 
@@ -21,7 +21,7 @@ namespace RYSIC
 		int m_exitCode = 0;
 		Ref<Interface::Window> m_window;
 		Ref<Interface::Canvas> m_canvas;
-		Ref<Interface::ProgressBar> m_hp_bar;
+		Ref<Interface::CharacterPanel> m_character_panel;
 		tcod::Tileset m_tileset;
 
 		World::World* m_world = nullptr;
@@ -37,8 +37,9 @@ namespace RYSIC
 		void set_title(const std::string &title);
 		World::World* world() const { return m_world; }
 		World::Map* map() const { return m_world->map(); }
+		Ref<Interface::CharacterPanel> character_panel() const { return m_character_panel; }
 
-		void set_event_handler(EventHandler* handler) { m_event_handler = handler; };
+		void set_event_handler(EventHandler* handler);
 
 		bool fullscreen() const { return m_fullscreen; }
 		bool debug() const { return m_debug; }
@@ -49,6 +50,7 @@ namespace RYSIC
 		void regenerate_map();
 
 		void populate_window();
+		void start_message();
 
 		static SDL_HitTestResult HitTestCallback(SDL_Window *win, const SDL_Point *area, void *data);
 	};

@@ -66,7 +66,7 @@ namespace RYSIC::Log
 	unsigned long Message::age() const
 	{
 		if(Game::Instance()->world())
-			return Game::Instance()->world()->time() - timestamp;
+			return Game::Instance()->world()->time()->tics - timestamp;
 		else
 			return timestamp;
 	}
